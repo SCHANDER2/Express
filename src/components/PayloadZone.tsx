@@ -33,9 +33,9 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
       id="payload-zone" 
       className="w-full max-w-7xl mx-auto px-6 mt-12 transition-all duration-700 ease-out transform"
     >
-      <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-white/5 relative">
+      <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 relative">
         {/* Terminal Header */}
-        <div className="bg-zinc-950/80 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/5 gap-4">
+        <div className="bg-slate-950 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-slate-850 gap-4">
           <div className="flex items-center gap-3">
             {/* macOS Style Window controls */}
             <div className="flex gap-1.5 mr-2">
@@ -43,22 +43,22 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
               <span className="w-2.5 h-2.5 rounded-full bg-state-warning/70 block"></span>
               <span className="w-2.5 h-2.5 rounded-full bg-state-success/70 block"></span>
             </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
-              <Terminal className="w-4 h-4 text-indigo-400" />
+            <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
+              <Terminal className="w-4 h-4 text-brand-primary" />
               <span>payload-generation-pipeline</span>
-              <span className="text-white/10">|</span>
-              <span className="text-brand-accent font-bold uppercase tracking-wider">{activeTab}</span>
+              <span className="text-slate-800">|</span>
+              <span className="text-brand-primary font-bold uppercase tracking-wider">{activeTab}</span>
             </div>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-zinc-950 p-1 rounded-xl border border-white/5">
+          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
             <button
               onClick={() => { setActiveTab("jsonLd"); setCopied(false); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "jsonLd"
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-text-secondary hover:text-white"
+                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <FileCode className="w-3.5 h-3.5" />
@@ -69,8 +69,8 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
               onClick={() => { setActiveTab("faqMarkdown"); setCopied(false); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "faqMarkdown"
-                  ? "bg-indigo-650 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-text-secondary hover:text-white"
+                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -80,8 +80,8 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
               onClick={() => { setActiveTab("geoCopy"); setCopied(false); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "geoCopy"
-                  ? "bg-indigo-650 text-white shadow-lg shadow-indigo-500/20"
-                  : "text-text-secondary hover:text-white"
+                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
+                  : "text-slate-400 hover:text-slate-200"
               }`}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -91,7 +91,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Terminal Body */}
-        <div className="relative bg-zinc-950/70 p-6 sm:p-8 font-mono text-xs sm:text-sm text-white leading-relaxed overflow-x-auto min-h-[300px]">
+        <div className="relative bg-slate-950 p-6 sm:p-8 font-mono text-xs sm:text-sm text-slate-100 leading-relaxed overflow-x-auto min-h-[300px]">
           {/* Copy Button */}
           <div className="absolute top-4 right-4 z-10">
             <button
@@ -100,12 +100,12 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 border shadow-md active:scale-98 cursor-pointer ${
                 copied
                   ? "bg-emerald-500/10 text-emerald-450 border-emerald-500/30"
-                  : "bg-zinc-900 text-text-secondary border-white/5 hover:bg-zinc-800 hover:text-white hover:border-indigo-500/30"
+                  : "bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800 hover:text-white"
               }`}
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-brand-accent" />
+                  <Check className="w-3.5 h-3.5 text-brand-primary" />
                   <span>Copied!</span>
                 </>
               ) : (
@@ -126,13 +126,13 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Payload Usage Instructions */}
-        <div className="bg-zinc-950/40 border-t border-white/5 px-6 py-4 text-2xs text-text-secondary flex items-center justify-between">
-          <span className="font-semibold text-text-secondary">
+        <div className="bg-slate-900/40 border-t border-slate-850 px-6 py-4 text-2xs text-slate-400 flex items-center justify-between">
+          <span className="font-semibold text-slate-400">
             {activeTab === "jsonLd" && "ℹ️ Paste this JSON-LD script inside the <head> tag of your target website code."}
             {activeTab === "faqMarkdown" && "ℹ️ Add these FAQs in a clear visible content section of your site, optimized for semantic vector searching."}
             {activeTab === "geoCopy" && "ℹ️ Paste this section in your website footer or about page to trigger credibility matches on LLMs."}
           </span>
-          <span className="font-mono text-brand-accent font-bold uppercase tracking-wider">DEPLOYMENT_READY</span>
+          <span className="font-mono text-brand-primary font-bold uppercase tracking-wider">DEPLOYMENT_READY</span>
         </div>
       </div>
     </section>

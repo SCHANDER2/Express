@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg-main: #09090b;
-  --color-surface-base: rgba(15, 23, 42, 0.65);
-  --color-surface-overlay: rgba(30, 41, 59, 0.85);
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a1a1aa;
-  --color-brand-primary: #6366f1; /* Vibrant Indigo */
-  --color-brand-accent: #10b981; /* Vibrant Emerald */
-  --color-state-success: #10b981;
-  --color-state-warning: #f59e0b;
-  --color-state-error: #ef4444;
+  --color-bg-main: #F9FAFB;
+  --color-surface-base: #FFFFFF;
+  --color-surface-overlay: #F1F5F9;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-brand-primary: #0891B2; /* Cyan */
+  --color-brand-accent: #F97316; /* Orange */
+  --color-state-success: #10B981;
+  --color-state-warning: #F97316;
+  --color-state-error: #EF4444;
 }
 
 @theme {
   --font-sans: var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
-  /* Color definitions */
+  /* Color mapping */
   --color-bg-main: var(--color-bg-main);
   --color-surface-base: var(--color-surface-base);
   --color-surface-overlay: var(--color-surface-overlay);
@@ -29,7 +29,7 @@
   --color-state-warning: var(--color-state-warning);
   --color-state-error: var(--color-state-error);
 
-  /* Spacing Tokens */
+  /* Spacing system adjustments */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -37,38 +37,8 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
 
-  /* Custom Animations */
-  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-float: float 6s ease-in-out infinite;
-  --animate-glow-indigo: glow-indigo 2s ease-in-out infinite alternate;
-  --animate-glow-emerald: glow-emerald 2s ease-in-out infinite alternate;
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-8px);
-  }
-}
-
-@keyframes glow-indigo {
-  from {
-    box-shadow: 0 0 10px rgba(99, 102, 241, 0.15), inset 0 0 5px rgba(99, 102, 241, 0.05);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.35), inset 0 0 10px rgba(99, 102, 241, 0.1);
-  }
-}
-
-@keyframes glow-emerald {
-  from {
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.15), inset 0 0 5px rgba(16, 185, 129, 0.05);
-  }
-  to {
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.35), inset 0 0 10px rgba(16, 185, 129, 0.1);
-  }
+  /* Transitions */
+  --transition-all-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Custom Scrollbars */
@@ -82,12 +52,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.08);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.18);
 }
 
 body {
@@ -98,32 +68,28 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Dynamic Frosted Glass Panels */
-.glass-panel {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* Focus indicator policy */
+input:focus, button:focus {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
 }
 
-.glass-panel-hover:hover {
-  transform: translateY(-4px);
-  border-color: rgba(99, 102, 241, 0.25);
-  box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.15), 0 0 25px rgba(99, 102, 241, 0.05);
+/* Light Mode Premium Card Panels */
+.light-panel {
+  background-color: var(--color-surface-base);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -1px rgba(15, 23, 42, 0.02), 0 10px 30px -10px rgba(15, 23, 42, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.glass-panel-hover-emerald:hover {
-  transform: translateY(-4px);
-  border-color: rgba(16, 185, 129, 0.25);
-  box-shadow: 0 12px 40px -10px rgba(16, 185, 129, 0.15), 0 0 25px rgba(16, 185, 129, 0.05);
+.light-panel:hover {
+  border-color: rgba(8, 145, 178, 0.3);
+  box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.1), 0 0 15px rgba(8, 145, 178, 0.03);
+  transform: translateY(-2px);
 }
 
-/* Cyber mesh grid background overlay */
-.cyber-grid {
-  background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 32px 32px;
+/* Custom dot grid overlay for light theme */
+.dot-grid {
+  background-image: radial-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
