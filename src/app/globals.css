@@ -1,15 +1,15 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg-main: #000000;
-  --color-surface-base: #0D0D0D;
-  --color-surface-overlay: #161616;
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #94A3B8;
-  --color-brand-primary: #FF3E00; /* Reddish Orange */
-  --color-brand-accent: #FF5A00; /* Vibrant Orange */
+  --color-bg-main: #F9FAFB;
+  --color-surface-base: #FFFFFF;
+  --color-surface-overlay: #F1F5F9;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-brand-primary: #0891B2; /* Cyan */
+  --color-brand-accent: #F97316; /* Orange */
   --color-state-success: #10B981;
-  --color-state-warning: #FF5A00;
+  --color-state-warning: #F97316;
   --color-state-error: #EF4444;
 }
 
@@ -52,12 +52,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.08);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(15, 23, 42, 0.18);
 }
 
 /* Log Terminal Scrollbar */
@@ -65,14 +65,14 @@
   width: 6px;
 }
 .log-scrollbar::-webkit-scrollbar-track {
-  background: #050505;
+  background: #090d16;
 }
 .log-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 .log-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 body {
@@ -89,23 +89,23 @@ input:focus, button:focus {
   outline-offset: 2px;
 }
 
-/* CRED Style Dark Card Panels */
+/* Light Mode Premium Card Panels */
 .light-panel {
   background-color: var(--color-surface-base);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.03), 0 2px 4px -1px rgba(15, 23, 42, 0.02), 0 10px 30px -10px rgba(15, 23, 42, 0.05);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .light-panel:hover {
-  border-color: rgba(255, 62, 0, 0.35);
-  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.9), 0 0 15px rgba(255, 62, 0, 0.04);
+  border-color: rgba(8, 145, 178, 0.3);
+  box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.1), 0 0 15px rgba(8, 145, 178, 0.03);
   transform: translateY(-2px);
 }
 
-/* Faint dot grid overlay for dark theme */
+/* Custom dot grid overlay for light theme */
 .dot-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
