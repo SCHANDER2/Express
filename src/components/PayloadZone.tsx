@@ -35,7 +35,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
     >
       <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 relative">
         {/* Terminal Header */}
-        <div className="bg-slate-955 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-slate-850 gap-4">
+        <div className="bg-slate-950 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-slate-850 gap-4">
           <div className="flex items-center gap-3">
             {/* macOS Style Window controls */}
             <div className="flex gap-1.5 mr-2">

@@ -213,27 +213,22 @@ export default function Home() {
         {status === "idle" && (
           <div className="w-full max-w-5xl px-6 tab-fade-in flex flex-col items-center">
             
-            {/* Centered Hero Header styled as a premium CRED Black & Reddish Orange Box */}
-            <div className="w-full max-w-2xl bg-black rounded-3xl p-8 border border-slate-800 text-center mb-12 shadow-xl relative overflow-hidden select-none">
-              {/* Subtle orange mesh glow in the background of the box */}
-              <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-[#FF3E00]/10 rounded-full blur-[60px] pointer-events-none"></div>
-              
-              <div className="relative z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FF3E00]/15 text-[#FF5A00] text-xs font-bold border border-[#FF3E00]/25 mb-6 shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 animate-pulse text-[#FF5A00]" />
-                  <span>Generative, Voice & Vector Optimization Pipeline</span>
-                </div>
-                
-                {/* EXPRESS title in CRED typography style */}
-                <h1 className="text-5xl md:text-7xl font-black tracking-widest text-white uppercase mb-4 filter drop-shadow-[0_0_20px_rgba(255,62,0,0.25)]">
-                  EXPRESS
-                </h1>
-                
-                {/* Subtitle paragraph in normal block horizontal layout */}
-                <p className="text-xs sm:text-sm text-slate-350 w-full max-w-xl mx-auto font-medium tracking-wide leading-relaxed">
-                  Analyze your website alignment against AI crawlers, natural language parsing layers, and vector search engines.
-                </p>
+            {/* Centered Hero Header - Block container with mx-auto to prevent collapsing */}
+            <div className="w-full text-center mb-12 select-none">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold border border-brand-primary/20 mb-6 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 animate-pulse text-brand-accent" />
+                <span>Generative, Voice & Vector Optimization Pipeline</span>
               </div>
+              
+              {/* EXPRESS title in CRED bold uppercase typography, Slate-to-Orange gradient */}
+              <h1 className="text-6xl md:text-8xl font-black tracking-widest uppercase mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#0F172A] via-[#0F172A] to-[#F97316]">
+                EXPRESS
+              </h1>
+              
+              {/* Horizontal subtitle paragraph with max-w-xl mx-auto block centering */}
+              <p className="text-sm md:text-base text-text-secondary w-full max-w-xl mx-auto font-medium tracking-wide leading-relaxed">
+                Analyze your website alignment against AI crawlers, natural language parsing layers, and vector search engines.
+              </p>
             </div>
 
             {/* URL Input Box */}
@@ -301,7 +296,7 @@ export default function Home() {
                         <div className={`w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
                           isCompleted ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary" :
                           isActive ? "bg-brand-primary/10 border-brand-primary text-brand-accent animate-pulse shadow-sm" :
-                          "bg-slate-100 border-slate-200 text-text-secondary"
+                          "bg-slate-105 border-slate-200 text-text-secondary"
                         }`}>
                           {isCompleted ? (
                             <CheckCircle2 className="w-4.5 h-4.5 text-state-success" />
@@ -311,7 +306,7 @@ export default function Home() {
                         </div>
                         
                         {idx < PIPELINE_STEPS.length - 1 && (
-                          <div className={`w-0.5 h-10 mt-1 transition-all duration-500 ${
+                          <div className={`w-0.5 h-10 mt-1 transition-all duration-550 ${
                             isCompleted ? "bg-brand-primary/30" : "bg-slate-200"
                           }`}></div>
                         )}
@@ -355,7 +350,7 @@ export default function Home() {
                 <span className="text-4xs font-mono text-brand-primary tracking-widest animate-pulse">STREAMING</span>
               </header>
 
-              <div className="flex-1 p-5 font-mono text-3xs sm:text-2xs text-slate-350 overflow-y-auto space-y-2 log-scrollbar bg-slate-950">
+              <div className="flex-1 p-5 font-mono text-3xs sm:text-2xs text-slate-350 overflow-y-auto space-y-2 log-scrollbar bg-slate-955">
                 {logs.map((log, index) => {
                   let isSuccess = log.includes("[SUCCESS]") || log.includes("success");
                   let isWarning = log.includes("[WARNING]");

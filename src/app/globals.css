@@ -29,7 +29,7 @@
   --color-state-warning: var(--color-state-warning);
   --color-state-error: var(--color-state-error);
 
-  /* Spacing system adjustments */
+  /* Spacing Tokens */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;

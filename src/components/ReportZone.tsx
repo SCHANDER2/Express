@@ -48,13 +48,13 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                 {marketProfile.personas.map((persona, idx) => (
                   <div 
                     key={idx} 
-                    className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 hover:border-brand-primary/25 transition-all duration-300 group/card"
+                    className="bg-slate-55/60 rounded-xl p-5 border border-slate-200/60 hover:border-brand-primary/25 transition-all duration-300 group/card"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <h4 className="font-bold text-text-primary text-sm group-hover/card:text-brand-primary transition-colors">
                         {persona.role}
                       </h4>
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                         {persona.intent}
                       </span>
                     </div>
@@ -92,7 +92,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
               <h3 className="text-xs font-bold tracking-wider text-brand-primary uppercase flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" /> Intent Distribution
               </h3>
-              <div className="bg-slate-50 rounded-xl p-6 border border-slate-200/60 h-full flex flex-col justify-center">
+              <div className="bg-slate-55/60 rounded-xl p-6 border border-slate-200/60 h-full flex flex-col justify-center">
                 <div className="space-y-4 mb-6">
                   {marketProfile.intents.map((intent, idx) => (
                     <div key={idx} className="flex items-center justify-between text-xs border-b border-slate-200/40 pb-2 last:border-0 last:pb-0">
@@ -137,8 +137,8 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
               <FileText className="w-4 h-4" /> AI Content Gap Analysis
             </h3>
             <div className="overflow-x-auto rounded-xl border border-slate-200/65 bg-white">
-              <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                <thead className="bg-slate-50 text-text-primary font-bold border-b border-slate-200">
+              <table className="min-w-full divide-y divide-slate-250 text-left text-xs">
+                <thead className="bg-slate-55 text-text-primary font-bold border-b border-slate-200">
                   <tr>
                     <th className="px-5 py-4">Topic Path / Content Gap</th>
                     <th className="px-4 py-4">Priority</th>
@@ -194,7 +194,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
           {/* Circular dial indicators */}
           <div className="flex flex-col sm:flex-row gap-4 lg:col-span-1">
             {/* AEO Score */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="bg-slate-55/60 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
               <h4 className="text-3xs font-bold text-text-secondary uppercase tracking-wider">AEO Score</h4>
               <div className="relative w-24 h-24 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -230,7 +230,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
             </div>
 
             {/* GEO Score */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="bg-slate-55/60 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
               <h4 className="text-3xs font-bold text-text-secondary uppercase tracking-wider">GEO Score</h4>
               <div className="relative w-24 h-24 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -271,7 +271,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
             <h3 className="text-xs font-bold tracking-wider text-brand-accent uppercase flex items-center gap-2">
               <Cpu className="w-4 h-4" /> Extracted NLP Entities
             </h3>
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 h-full flex flex-col justify-center">
+            <div className="bg-slate-55/60 rounded-xl p-5 border border-slate-200/60 h-full flex flex-col justify-center">
               <p className="text-3xs text-text-secondary mb-4 leading-relaxed">
                 Core entities resolved from your website copy. Conversational AI search engines use these nodes to establish business classification.
               </p>
@@ -310,7 +310,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
               return (
                 <div 
                   key={idx}
-                  className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/60 flex flex-col gap-2 hover:border-slate-250 transition-all duration-300"
+                  className="bg-slate-55/60 rounded-xl p-4 border border-slate-200/60 flex flex-col gap-2 hover:border-slate-250 transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
