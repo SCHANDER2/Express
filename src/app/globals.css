@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg-main: #060b13;
-  --color-surface-base: #0c1322;
-  --color-surface-overlay: #18233c;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-brand-primary: #2563eb;
-  --color-brand-accent: #0ea5e9;
-  --color-state-success: #166534;
-  --color-state-warning: #d97706;
-  --color-state-error: #dc2626;
+  --color-bg-main: #09090b;
+  --color-surface-base: rgba(15, 23, 42, 0.65);
+  --color-surface-overlay: rgba(30, 41, 59, 0.85);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-brand-primary: #6366f1; /* Vibrant Indigo */
+  --color-brand-accent: #10b981; /* Vibrant Emerald */
+  --color-state-success: #10b981;
+  --color-state-warning: #f59e0b;
+  --color-state-error: #ef4444;
 }
 
 @theme {
   --font-sans: var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
-  /* Bind custom colors */
+  /* Color definitions */
   --color-bg-main: var(--color-bg-main);
   --color-surface-base: var(--color-surface-base);
   --color-surface-overlay: var(--color-surface-overlay);
@@ -29,7 +29,7 @@
   --color-state-warning: var(--color-state-warning);
   --color-state-error: var(--color-state-error);
 
-  /* Spacing system adjustments */
+  /* Spacing Tokens */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -37,8 +37,38 @@
   --spacing-xl: 32px;
   --spacing-xxl: 48px;
 
-  /* Standard transitions */
-  --transition-all-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Custom Animations */
+  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow-indigo: glow-indigo 2s ease-in-out infinite alternate;
+  --animate-glow-emerald: glow-emerald 2s ease-in-out infinite alternate;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow-indigo {
+  from {
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.15), inset 0 0 5px rgba(99, 102, 241, 0.05);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.35), inset 0 0 10px rgba(99, 102, 241, 0.1);
+  }
+}
+
+@keyframes glow-emerald {
+  from {
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.15), inset 0 0 5px rgba(16, 185, 129, 0.05);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.35), inset 0 0 10px rgba(16, 185, 129, 0.1);
+  }
 }
 
 /* Custom Scrollbars */
@@ -52,13 +82,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 4px;
-  border: 2px solid var(--color-bg-main);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 body {
@@ -67,31 +96,34 @@ body {
   font-family: var(--font-sans);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Global focus state policy */
-input:focus, button:focus {
-  outline: 2px solid var(--color-brand-primary);
-  outline-offset: 2px;
+/* Dynamic Frosted Glass Panels */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Premium B2B Panel styling */
-.uix-panel {
-  background-color: var(--color-surface-base);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
-  transition: border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+.glass-panel-hover:hover {
+  transform: translateY(-4px);
+  border-color: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.15), 0 0 25px rgba(99, 102, 241, 0.05);
 }
 
-.uix-panel:hover {
-  border-color: rgba(37, 99, 235, 0.2);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
-  transform: translateY(-2px);
+.glass-panel-hover-emerald:hover {
+  transform: translateY(-4px);
+  border-color: rgba(16, 185, 129, 0.25);
+  box-shadow: 0 12px 40px -10px rgba(16, 185, 129, 0.15), 0 0 25px rgba(16, 185, 129, 0.05);
 }
 
-/* Subtly animated dot background */
-.b2b-grid {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 24px 24px;
+/* Cyber mesh grid background overlay */
+.cyber-grid {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 32px 32px;
 }

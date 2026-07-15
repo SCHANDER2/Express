@@ -33,9 +33,9 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
       id="payload-zone" 
       className="w-full max-w-7xl mx-auto px-6 mt-12 transition-all duration-700 ease-out transform"
     >
-      <div className="bg-surface-base rounded-2xl overflow-hidden shadow-2xl border border-white/5 relative">
+      <div className="glass-panel rounded-2xl overflow-hidden shadow-2xl border border-white/5 relative">
         {/* Terminal Header */}
-        <div className="bg-bg-main px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/5 gap-4">
+        <div className="bg-zinc-950/80 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-white/5 gap-4">
           <div className="flex items-center gap-3">
             {/* macOS Style Window controls */}
             <div className="flex gap-1.5 mr-2">
@@ -44,7 +44,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
               <span className="w-2.5 h-2.5 rounded-full bg-state-success/70 block"></span>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-text-secondary">
-              <Terminal className="w-4 h-4 text-brand-primary" />
+              <Terminal className="w-4 h-4 text-indigo-400" />
               <span>payload-generation-pipeline</span>
               <span className="text-white/10">|</span>
               <span className="text-brand-accent font-bold uppercase tracking-wider">{activeTab}</span>
@@ -52,13 +52,13 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-bg-main p-1 rounded-xl border border-white/5">
+          <div className="flex bg-zinc-950 p-1 rounded-xl border border-white/5">
             <button
               onClick={() => { setActiveTab("jsonLd"); setCopied(false); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "jsonLd"
-                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/10"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20"
+                  : "text-text-secondary hover:text-white"
               }`}
             >
               <FileCode className="w-3.5 h-3.5" />
@@ -67,10 +67,10 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
             </button>
             <button
               onClick={() => { setActiveTab("faqMarkdown"); setCopied(false); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "faqMarkdown"
-                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/10"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-indigo-650 text-white shadow-lg shadow-indigo-500/20"
+                  : "text-text-secondary hover:text-white"
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -78,10 +78,10 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
             </button>
             <button
               onClick={() => { setActiveTab("geoCopy"); setCopied(false); }}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
                 activeTab === "geoCopy"
-                  ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/10"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-indigo-650 text-white shadow-lg shadow-indigo-500/20"
+                  : "text-text-secondary hover:text-white"
               }`}
             >
               <Globe className="w-3.5 h-3.5" />
@@ -91,21 +91,21 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Terminal Body */}
-        <div className="relative bg-bg-main/60 p-6 sm:p-8 font-mono text-xs sm:text-sm text-text-primary leading-relaxed overflow-x-auto min-h-[300px]">
+        <div className="relative bg-zinc-950/70 p-6 sm:p-8 font-mono text-xs sm:text-sm text-white leading-relaxed overflow-x-auto min-h-[300px]">
           {/* Copy Button */}
           <div className="absolute top-4 right-4 z-10">
             <button
               onClick={handleCopy}
               aria-label="Copy code payload"
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 border shadow-md active:scale-98 ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 border shadow-md active:scale-98 cursor-pointer ${
                 copied
-                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                  : "bg-surface-base text-text-secondary border-white/5 hover:bg-surface-overlay hover:text-text-primary"
+                  ? "bg-emerald-500/10 text-emerald-450 border-emerald-500/30"
+                  : "bg-zinc-900 text-text-secondary border-white/5 hover:bg-zinc-800 hover:text-white hover:border-indigo-500/30"
               }`}
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5" />
+                  <Check className="w-3.5 h-3.5 text-brand-accent" />
                   <span>Copied!</span>
                 </>
               ) : (
@@ -126,7 +126,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Payload Usage Instructions */}
-        <div className="bg-bg-main/30 border-t border-white/5 px-6 py-4 text-2xs text-text-secondary flex items-center justify-between">
+        <div className="bg-zinc-950/40 border-t border-white/5 px-6 py-4 text-2xs text-text-secondary flex items-center justify-between">
           <span className="font-semibold text-text-secondary">
             {activeTab === "jsonLd" && "ℹ️ Paste this JSON-LD script inside the <head> tag of your target website code."}
             {activeTab === "faqMarkdown" && "ℹ️ Add these FAQs in a clear visible content section of your site, optimized for semantic vector searching."}
