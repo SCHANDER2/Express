@@ -31,7 +31,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
   return (
     <section 
       id="payload-zone" 
-      className="w-full max-w-7xl mx-auto px-6 mt-12 transition-all duration-700 ease-out transform"
+      className="w-full max-w-7xl mx-auto px-6 tab-fade-in transition-all duration-700 ease-out transform"
     >
       <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 relative">
         {/* Terminal Header */}

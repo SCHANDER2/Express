@@ -29,7 +29,7 @@
   --color-state-warning: var(--color-state-warning);
   --color-state-error: var(--color-state-error);
 
-  /* Spacing system adjustments */
+  /* Spacing Tokens */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -60,6 +60,21 @@
   background: rgba(15, 23, 42, 0.18);
 }
 
+/* Log Terminal Scrollbar */
+.log-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.log-scrollbar::-webkit-scrollbar-track {
+  background: #090d16;
+}
+.log-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.log-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 body {
   background-color: var(--color-bg-main);
   color: var(--color-text-primary);
@@ -68,13 +83,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Focus indicator policy */
+/* Global focus state policy */
 input:focus, button:focus {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 
-/* Light Mode Premium Card Panels */
+/* Premium Card Panels */
 .light-panel {
   background-color: var(--color-surface-base);
   border: 1px solid rgba(15, 23, 42, 0.06);
@@ -92,4 +107,20 @@ input:focus, button:focus {
 .dot-grid {
   background-image: radial-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+/* Tab content animations */
+.tab-fade-in {
+  animation: tabFade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes tabFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
