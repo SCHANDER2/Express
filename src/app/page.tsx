@@ -247,7 +247,7 @@ export default function Home() {
         {status === "idle" && (
           <div className="w-full max-w-5xl px-6 tab-fade-in flex flex-col items-center">
             {/* Centered Hero Header */}
-            <div className="text-center mb-12 flex flex-col items-center">
+            <div className="w-full max-w-2xl text-center mb-12 flex flex-col items-center">
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold border border-brand-primary/20 mb-6 shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-brand-accent animate-pulse" />
                 <span>Generative, Voice & Vector Optimization Pipeline</span>
@@ -255,7 +255,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-6xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-text-primary via-slate-700 to-brand-primary mb-4 select-none">
                 EXPRESS
               </h1>
-              <p className="text-sm md:text-base text-text-secondary max-w-xl font-medium tracking-wide leading-relaxed">
+              <p className="text-sm md:text-base text-text-secondary w-full max-w-xl text-center font-medium tracking-wide leading-relaxed">
                 Analyze your website alignment against AI crawlers, natural language parsing layers, and vector search engines.
               </p>
             </div>
@@ -311,32 +311,35 @@ export default function Home() {
                   <div
                     key={idx}
                     onClick={() => handleLoadDemo(demo.domain)}
-                    className="light-panel rounded-2xl p-6 flex flex-col justify-between gap-5 cursor-pointer relative group overflow-hidden"
+                    className="light-panel rounded-2xl p-6 flex flex-col gap-6 cursor-pointer relative group transition-all duration-300"
                   >
-                    <div className="absolute top-0 right-0 p-2.5 bg-brand-primary/10 text-brand-primary rounded-bl-xl text-4xs font-bold uppercase border-l border-b border-brand-primary/20 select-none">
-                      {demo.badge}
-                    </div>
-
-                    <div className="flex flex-col gap-3">
-                      <div className="p-2.5 bg-slate-100 text-slate-700 rounded-lg w-10 h-10 flex items-center justify-center group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-colors">
+                    {/* Top Row: Icon and Badge */}
+                    <div className="flex items-center justify-between gap-2 border-b border-slate-100/60 pb-4">
+                      <div className="p-2.5 bg-slate-150/80 text-slate-700 rounded-xl group-hover:bg-brand-primary/10 group-hover:text-brand-primary transition-all duration-200">
                         <DemoIcon className="w-5 h-5" />
                       </div>
-                      <div>
-                        <h4 className="font-bold text-text-primary text-sm group-hover:text-brand-primary transition-colors">
-                          {demo.title}
-                        </h4>
-                        <span className="text-3xs font-mono text-brand-primary/80 font-bold block mt-0.5">
-                          {demo.domain}
-                        </span>
-                      </div>
-                      <p className="text-xs text-text-secondary leading-relaxed">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-4xs font-bold font-mono tracking-widest uppercase bg-brand-primary/10 text-brand-primary border border-brand-primary/20 select-none">
+                        {demo.badge}
+                      </span>
+                    </div>
+
+                    {/* Middle: Title & Description */}
+                    <div className="flex flex-col gap-2">
+                      <h4 className="font-extrabold text-text-primary text-base group-hover:text-brand-primary transition-colors">
+                        {demo.title}
+                      </h4>
+                      <span className="text-3xs font-mono text-brand-primary/80 font-bold block">
+                        {demo.domain}
+                      </span>
+                      <p className="text-xs text-text-secondary leading-relaxed mt-1">
                         {demo.desc}
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-brand-primary group-hover:translate-x-1 transition-all">
+                    {/* Bottom: Action link footer */}
+                    <div className="flex items-center justify-between text-xs font-bold text-brand-primary group-hover:text-cyan-600 border-t border-slate-100/60 pt-4 mt-auto">
                       <span>Launch Pipeline</span>
-                      <ChevronRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </div>
                   </div>
                 );
