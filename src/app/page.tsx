@@ -88,52 +88,52 @@ export default function Home() {
   };
 
   return (
-    <div className="cyber-grid min-h-screen flex flex-col justify-between relative bg-gray-950 font-sans text-gray-100 overflow-hidden">
+    <div className="b2b-grid min-h-screen flex flex-col justify-between relative bg-bg-main font-sans text-text-primary overflow-hidden">
       
-      {/* Decorative Gradient Background Highlights */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none"></div>
+      {/* Subtle background gradient overlay for depth */}
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-brand-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-15%] right-[-10%] w-[60%] h-[60%] bg-brand-accent/5 rounded-full blur-[150px] pointer-events-none"></div>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col items-center py-16 px-4 relative z-10 w-full">
+      <div className="flex-1 flex flex-col items-center py-16 px-6 relative z-10 w-full">
         
         {/* HERO HEADER */}
         <header className="text-center mb-16 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold border border-indigo-500/20 mb-5 animate-float shadow-lg shadow-indigo-500/5">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Next-Generation SEO, GEO & AEO Parser</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold border border-brand-primary/20 mb-6 shadow-md shadow-brand-primary/5">
+            <Zap className="w-3.5 h-3.5 text-brand-accent" />
+            <span>Next-Gen SEO, GEO & AEO Parser</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-400 mb-4 select-none drop-shadow-sm filter">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter text-text-primary mb-4 select-none">
             EXPRESS
           </h1>
-          <p className="text-sm md:text-base text-gray-400 max-w-xl font-medium tracking-wide">
+          <p className="text-sm md:text-base text-text-secondary max-w-xl font-medium tracking-wide leading-relaxed">
             Generative & Answer Engine Optimization Pipeline
           </p>
         </header>
 
         {/* INPUT ZONE */}
-        <div className="w-full max-w-2xl px-4 sm:px-6 mb-12">
+        <div className="w-full max-w-2xl mb-12">
           <form 
             onSubmit={handleAnalyze} 
-            className="glass-panel p-2 rounded-2xl flex flex-col sm:flex-row gap-2 shadow-2xl border border-gray-800/80 transition-all duration-300 focus-within:border-indigo-500/40 focus-within:ring-2 focus-within:ring-indigo-500/10"
+            className="bg-surface-base p-2 rounded-2xl flex flex-col sm:flex-row gap-2 shadow-2xl border border-white/5 transition-all duration-300 focus-within:border-brand-primary/45 focus-within:ring-2 focus-within:ring-brand-primary/10"
           >
             <div className="flex-1 flex items-center gap-3 px-3 py-2 sm:py-0">
-              <Globe className="w-5 h-5 text-gray-500 flex-shrink-0" />
+              <Globe className="w-5 h-5 text-text-secondary flex-shrink-0" />
               <input
                 type="text"
                 disabled={status === "analyzing"}
                 placeholder="https://yourwebsite.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className="bg-transparent border-0 outline-none w-full text-sm sm:text-base placeholder-gray-650 text-white font-medium focus:ring-0"
+                className="bg-transparent border-0 outline-none w-full text-sm sm:text-base placeholder-text-secondary text-text-primary font-medium focus:ring-0"
               />
             </div>
             
             <button
               type="submit"
               disabled={status === "analyzing"}
-              className="px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm font-bold tracking-wide transition-all duration-200 hover:bg-indigo-500 active:scale-98 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-indigo-650/20 group"
+              className="px-6 py-3 rounded-xl bg-brand-primary text-white text-sm font-bold tracking-wide transition-all active:scale-98 disabled:opacity-50 disabled:scale-100 flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20 group"
             >
               {status === "analyzing" ? (
                 <>
@@ -143,7 +143,7 @@ export default function Home() {
               ) : (
                 <>
                   <span>Analyze Website</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
                 </>
               )}
             </button>
@@ -151,7 +151,7 @@ export default function Home() {
 
           {/* Validation error */}
           {error && (
-            <div className="mt-3 flex items-center gap-2 text-rose-400 text-xs px-2 animate-scale-in">
+            <div className="mt-3 flex items-center gap-2 text-state-error text-xs px-2 animate-scale-in">
               <ShieldAlert className="w-4 h-4 flex-shrink-0" />
               <span className="font-semibold">{error}</span>
             </div>
@@ -160,9 +160,9 @@ export default function Home() {
 
         {/* LOADING & STEPPER ZONE */}
         {status === "analyzing" && (
-          <div className="w-full max-w-xl glass-panel rounded-2xl p-6 sm:p-8 shadow-2xl border border-gray-800/80 mb-12 animate-fade-in">
-            <h3 className="text-sm font-bold text-gray-300 uppercase tracking-wider mb-6 flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
+          <div className="w-full max-w-xl bg-surface-base rounded-2xl p-6 sm:p-8 shadow-2xl border border-white/5 mb-12 animate-fade-in">
+            <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-6 flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
               Optimization Engine Status
             </h3>
 
@@ -171,7 +171,6 @@ export default function Home() {
                 const StepIcon = step.icon;
                 const isCompleted = idx < currentStep;
                 const isActive = idx === currentStep;
-                const isPending = idx > currentStep;
 
                 return (
                   <div 
@@ -182,9 +181,9 @@ export default function Home() {
                   >
                     <div className="flex flex-col items-center">
                       <div className={`w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                        isCompleted ? "bg-indigo-600/15 border-indigo-500/50 text-indigo-400" :
-                        isActive ? "bg-indigo-500/10 border-indigo-500 text-indigo-400 animate-pulse" :
-                        "bg-gray-900 border-gray-800 text-gray-650"
+                        isCompleted ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary" :
+                        isActive ? "bg-brand-primary/10 border-brand-primary text-brand-accent animate-pulse" :
+                        "bg-bg-main border-white/5 text-text-secondary"
                       }`}>
                         {isCompleted ? (
                           <CheckCircle2 className="w-4.5 h-4.5" />
@@ -195,18 +194,18 @@ export default function Home() {
                       
                       {idx < PIPELINE_STEPS.length - 1 && (
                         <div className={`w-0.5 h-10 mt-1 transition-all duration-500 ${
-                          isCompleted ? "bg-indigo-500/50" : "bg-gray-850"
+                          isCompleted ? "bg-brand-primary/30" : "bg-white/5"
                         }`}></div>
                       )}
                     </div>
 
                     <div className="flex-1 pt-0.5">
                       <h4 className={`text-xs sm:text-sm font-bold tracking-wide transition-colors duration-300 ${
-                        isCompleted ? "text-gray-200" : isActive ? "text-indigo-400" : "text-gray-500"
+                        isCompleted ? "text-text-primary" : isActive ? "text-brand-primary" : "text-text-secondary"
                       }`}>
                         {step.title}
                       </h4>
-                      <p className="text-3xs sm:text-2xs text-gray-400 mt-0.5 leading-relaxed">
+                      <p className="text-3xs sm:text-2xs text-text-secondary mt-0.5 leading-relaxed">
                         {step.desc}
                       </p>
                     </div>
@@ -216,9 +215,9 @@ export default function Home() {
             </div>
             
             {/* Visual bottom progress bar */}
-            <div className="mt-8 bg-gray-900 h-1.5 w-full rounded-full overflow-hidden">
+            <div className="mt-8 bg-bg-main h-1.5 w-full rounded-full overflow-hidden border border-white/5">
               <div 
-                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-650 transition-all duration-500 ease-out"
+                className="h-full bg-brand-primary transition-all duration-550 ease-out"
                 style={{ width: `${(currentStep / PIPELINE_STEPS.length) * 100}%` }}
               ></div>
             </div>
@@ -229,24 +228,24 @@ export default function Home() {
         {status === "completed" && mockData && (
           <div className="w-full flex flex-col gap-12 animate-fade-in">
             {/* Divider header */}
-            <div className="w-full max-w-7xl mx-auto px-4 flex items-center gap-4">
-              <div className="h-px bg-gray-800 flex-1"></div>
-              <span className="text-xs font-mono text-indigo-400 uppercase tracking-widest bg-gray-950 px-3">
+            <div className="w-full max-w-7xl mx-auto px-6 flex items-center gap-4">
+              <div className="h-px bg-white/5 flex-1"></div>
+              <span className="text-2xs font-mono text-brand-primary uppercase tracking-widest bg-bg-main px-3 font-semibold">
                 Analysis Pipeline Output for {mockData.url}
               </span>
-              <div className="h-px bg-gray-800 flex-1"></div>
+              <div className="h-px bg-white/5 flex-1"></div>
             </div>
 
             {/* Zone 2: Report Zone */}
             <ReportZone data={mockData} />
 
             {/* Divider header */}
-            <div className="w-full max-w-7xl mx-auto px-4 flex items-center gap-4 mt-8">
-              <div className="h-px bg-gray-800 flex-1"></div>
-              <span className="text-xs font-mono text-indigo-400 uppercase tracking-widest bg-gray-950 px-3">
+            <div className="w-full max-w-7xl mx-auto px-6 flex items-center gap-4 mt-8">
+              <div className="h-px bg-white/5 flex-1"></div>
+              <span className="text-2xs font-mono text-brand-primary uppercase tracking-widest bg-bg-main px-3 font-semibold">
                 Payload Deployment Workspace
               </span>
-              <div className="h-px bg-gray-800 flex-1"></div>
+              <div className="h-px bg-white/5 flex-1"></div>
             </div>
 
             {/* Zone 3: Payload Deployment Zone */}
@@ -256,9 +255,9 @@ export default function Home() {
       </div>
 
       {/* FOOTER */}
-      <footer className="w-full text-center py-8 border-t border-gray-900/50 bg-gray-950/20 text-3xs text-gray-500 relative z-10 flex flex-col items-center gap-1.5">
+      <footer className="w-full text-center py-8 border-t border-white/5 bg-surface-base text-3xs text-text-secondary relative z-10 flex flex-col items-center gap-1.5">
         <p>© {new Date().getFullYear()} EXPRESS Pipeline. Zero-friction AEO, GEO, and SEO optimization.</p>
-        <p className="text-gray-600 font-mono">STATUS: SYSTEMS_OPERATIONAL // VER: 1.0.0</p>
+        <p className="text-text-secondary/40 font-mono tracking-widest">STATUS: SYSTEMS_OPERATIONAL // VER: 1.1.0</p>
       </footer>
     </div>
   );
