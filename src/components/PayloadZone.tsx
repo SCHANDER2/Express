@@ -31,11 +31,11 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
   return (
     <section 
       id="payload-zone" 
-      className="w-full max-w-7xl mx-auto px-6 tab-fade-in transition-all duration-700 ease-out transform"
+      className="w-full max-w-7xl mx-auto px-6 tab-fade-in transition-all duration-750 ease-out transform"
     >
-      <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 relative">
+      <div className="bg-slate-950 rounded-2xl overflow-hidden shadow-lg border border-[#1F1F1F] relative">
         {/* Terminal Header */}
-        <div className="bg-slate-950 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-slate-850 gap-4">
+        <div className="bg-slate-900/60 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-[#1F1F1F] gap-4">
           <div className="flex items-center gap-3">
             {/* macOS Style Window controls */}
             <div className="flex gap-1.5 mr-2">
@@ -52,7 +52,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
+          <div className="flex bg-[#0D0D0D] p-1 rounded-xl border border-[#1F1F1F]">
             <button
               onClick={() => { setActiveTab("jsonLd"); setCopied(false); }}
               className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
@@ -91,7 +91,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Terminal Body */}
-        <div className="relative bg-slate-950 p-6 sm:p-8 font-mono text-xs sm:text-sm text-slate-100 leading-relaxed overflow-x-auto min-h-[300px]">
+        <div className="relative bg-[#050505] p-6 sm:p-8 font-mono text-xs sm:text-sm text-slate-100 leading-relaxed overflow-x-auto min-h-[300px] border-t border-[#1F1F1F]">
           {/* Copy Button */}
           <div className="absolute top-4 right-4 z-10">
             <button
@@ -126,8 +126,8 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
         </div>
 
         {/* Payload Usage Instructions */}
-        <div className="bg-slate-900/40 border-t border-slate-850 px-6 py-4 text-2xs text-slate-400 flex items-center justify-between">
-          <span className="font-semibold text-slate-400">
+        <div className="bg-[#0D0D0D] border-t border-[#1F1F1F] px-6 py-4 text-2xs text-slate-450 flex items-center justify-between">
+          <span className="font-semibold">
             {activeTab === "jsonLd" && "ℹ️ Paste this JSON-LD script inside the <head> tag of your target website code."}
             {activeTab === "faqMarkdown" && "ℹ️ Add these FAQs in a clear visible content section of your site, optimized for semantic vector searching."}
             {activeTab === "geoCopy" && "ℹ️ Paste this section in your website footer or about page to trigger credibility matches on LLMs."}

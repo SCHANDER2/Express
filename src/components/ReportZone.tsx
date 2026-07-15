@@ -25,7 +25,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
       <div className="w-full max-w-7xl mx-auto px-6 tab-fade-in flex flex-col gap-8">
         {/* Market Profile Panel - Full Width */}
         <div className="light-panel rounded-2xl p-6 sm:p-8 flex flex-col gap-8 shadow-sm relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-primary to-cyan-500"></div>
+          <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-primary to-brand-accent"></div>
           
           <header className="flex items-center gap-3">
             <div className="p-3 bg-brand-primary/10 text-brand-primary rounded-xl border border-brand-primary/20">
@@ -48,13 +48,13 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                 {marketProfile.personas.map((persona, idx) => (
                   <div 
                     key={idx} 
-                    className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 hover:border-brand-primary/25 transition-all duration-300 group/card"
+                    className="bg-[#121212] rounded-xl p-5 border border-[#1F1F1F] hover:border-brand-primary/25 transition-all duration-300 group/card"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
                       <h4 className="font-bold text-text-primary text-sm group-hover/card:text-brand-primary transition-colors">
                         {persona.role}
                       </h4>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-3xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-3xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
                         {persona.intent}
                       </span>
                     </div>
@@ -92,10 +92,10 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
               <h3 className="text-xs font-bold tracking-wider text-brand-primary uppercase flex items-center gap-2">
                 <TrendingUp className="w-4 h-4" /> Intent Distribution
               </h3>
-              <div className="bg-slate-50 rounded-xl p-6 border border-slate-200/60 h-full flex flex-col justify-center">
+              <div className="bg-[#121212] rounded-xl p-6 border border-[#1F1F1F] h-full flex flex-col justify-center">
                 <div className="space-y-4 mb-6">
                   {marketProfile.intents.map((intent, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs border-b border-slate-200/40 pb-2 last:border-0 last:pb-0">
+                    <div key={idx} className="flex items-center justify-between text-xs border-b border-[#1F1F1F] pb-2 last:border-0 last:pb-0">
                       <div className="flex items-center gap-2">
                         <span 
                           className="w-2.5 h-2.5 rounded-full" 
@@ -103,7 +103,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                             backgroundColor: 
                               idx === 0 ? "var(--color-brand-primary)" : 
                               idx === 1 ? "var(--color-brand-accent)" : 
-                              idx === 2 ? "var(--color-state-success)" : "#94a3b8" 
+                              idx === 2 ? "var(--color-state-success)" : "#334155" 
                           }}
                         ></span>
                         <span className="text-text-secondary font-medium">{intent.type}</span>
@@ -113,7 +113,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                   ))}
                 </div>
                 {/* Visual Bar chart stack */}
-                <div className="h-3 w-full bg-slate-200 rounded-full overflow-hidden flex">
+                <div className="h-3 w-full bg-slate-900 rounded-full overflow-hidden flex">
                   {marketProfile.intents.map((intent, idx) => (
                     <div 
                       key={idx}
@@ -121,7 +121,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                       className={`h-full transition-all duration-1000 ${
                         idx === 0 ? "bg-brand-primary" : 
                         idx === 1 ? "bg-brand-accent" : 
-                        idx === 2 ? "bg-state-success" : "bg-slate-400"
+                        idx === 2 ? "bg-state-success" : "bg-slate-700"
                       }`}
                       title={`${intent.type}: ${intent.percentage}%`}
                     ></div>
@@ -136,25 +136,25 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
             <h3 className="text-xs font-bold tracking-wider text-brand-primary uppercase flex items-center gap-2">
               <FileText className="w-4 h-4" /> AI Content Gap Analysis
             </h3>
-            <div className="overflow-x-auto rounded-xl border border-slate-200/65 bg-white">
-              <table className="min-w-full divide-y divide-slate-200 text-left text-xs">
-                <thead className="bg-slate-50 text-text-primary font-bold border-b border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-[#1F1F1F] bg-[#0A0A0A]">
+              <table className="min-w-full divide-y divide-slate-800 text-left text-xs">
+                <thead className="bg-[#121212] text-text-primary font-bold border-b border-[#1F1F1F]">
                   <tr>
-                    <th className="px-5 py-4">Topic Path / Content Gap</th>
-                    <th className="px-4 py-4">Priority</th>
-                    <th className="px-4 py-4">Parser Status</th>
-                    <th className="px-5 py-4">Optimization Action</th>
+                    <th className="px-5 py-4 text-white">Topic Path / Content Gap</th>
+                    <th className="px-4 py-4 text-white">Priority</th>
+                    <th className="px-4 py-4 text-white">Parser Status</th>
+                    <th className="px-5 py-4 text-white">Optimization Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-text-secondary">
+                <tbody className="divide-y divide-[#121212] text-text-secondary">
                   {marketProfile.contentGaps.map((gap, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={idx} className="hover:bg-white/2 transition-colors">
                       <td className="px-5 py-4 font-bold text-text-primary">{gap.topic}</td>
                       <td className="px-4 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded text-3xs font-bold uppercase tracking-wider ${
                           gap.priority === "High" ? "bg-state-error/10 text-state-error border border-state-error/20" :
                           gap.priority === "Medium" ? "bg-brand-accent/10 text-brand-accent border border-brand-accent/20" :
-                          "bg-slate-100 text-text-secondary border border-slate-200"
+                          "bg-slate-800 text-text-secondary border border-slate-700"
                         }`}>
                           {gap.priority}
                         </span>
@@ -176,7 +176,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
   return (
     <div className="w-full max-w-7xl mx-auto px-6 tab-fade-in flex flex-col gap-8">
       <div className="light-panel rounded-2xl p-6 sm:p-8 flex flex-col gap-8 shadow-sm relative overflow-hidden group">
-        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-accent to-amber-500"></div>
+        <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-brand-accent to-brand-primary"></div>
 
         <header className="flex items-center gap-3">
           <div className="p-3 bg-brand-accent/10 text-brand-accent rounded-xl border border-brand-accent/20">
@@ -194,12 +194,12 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
           {/* Circular dial indicators */}
           <div className="flex flex-col sm:flex-row gap-4 lg:col-span-1">
             {/* AEO Score */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="bg-[#121212] rounded-xl p-5 border border-[#1F1F1F] flex-1 flex flex-col items-center justify-center gap-3 text-center">
               <h4 className="text-3xs font-bold text-text-secondary uppercase tracking-wider">AEO Score</h4>
               <div className="relative w-24 h-24 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <circle
-                    className="text-slate-200"
+                    className="text-slate-800"
                     strokeWidth="2.5"
                     stroke="currentColor"
                     fill="none"
@@ -230,12 +230,12 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
             </div>
 
             {/* GEO Score */}
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 flex-1 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="bg-[#121212] rounded-xl p-5 border border-[#1F1F1F] flex-1 flex flex-col items-center justify-center gap-3 text-center">
               <h4 className="text-3xs font-bold text-text-secondary uppercase tracking-wider">GEO Score</h4>
               <div className="relative w-24 h-24 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                   <circle
-                    className="text-slate-200"
+                    className="text-slate-800"
                     strokeWidth="2.5"
                     stroke="currentColor"
                     fill="none"
@@ -271,7 +271,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
             <h3 className="text-xs font-bold tracking-wider text-brand-accent uppercase flex items-center gap-2">
               <Cpu className="w-4 h-4" /> Extracted NLP Entities
             </h3>
-            <div className="bg-slate-50 rounded-xl p-5 border border-slate-200/60 h-full flex flex-col justify-center">
+            <div className="bg-[#121212] rounded-xl p-5 border border-[#1F1F1F] h-full flex flex-col justify-center">
               <p className="text-3xs text-text-secondary mb-4 leading-relaxed">
                 Core entities resolved from your website copy. Conversational AI search engines use these nodes to establish business classification.
               </p>
@@ -279,10 +279,10 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
                 {technicalInsights.entities.map((entity, idx) => (
                   <div 
                     key={idx} 
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-slate-200/80 hover:border-brand-primary/30 transition-all duration-200 text-xs"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0D0D0D] border border-[#1F1F1F] hover:border-brand-primary/30 transition-all duration-205 text-xs"
                   >
                     <span className="font-bold text-text-primary">{entity.name}</span>
-                    <span className="text-3xs text-text-secondary font-mono uppercase tracking-widest bg-slate-100 px-1.5 py-0.5 rounded">
+                    <span className="text-3xs text-text-secondary font-mono uppercase tracking-widest bg-slate-900 px-1.5 py-0.5 rounded">
                       {entity.type}
                     </span>
                     <span className="text-3xs text-brand-primary font-mono font-bold" title="Relevance Weight">
@@ -310,7 +310,7 @@ export default function ReportZone({ data, activeTab }: ReportZoneProps) {
               return (
                 <div 
                   key={idx}
-                  className="bg-slate-50/50 rounded-xl p-4 border border-slate-200/60 flex flex-col gap-2 hover:border-slate-200 transition-all duration-300"
+                  className="bg-[#121212] rounded-xl p-4 border border-[#1F1F1F] flex flex-col gap-2 hover:border-[#333333] transition-all duration-300"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5">
