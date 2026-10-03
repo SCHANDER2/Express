@@ -1,364 +1,265 @@
-// ============================================================
-// EXPRESS Pipeline — /api/analyze Route Handler
-// ============================================================
-// Accepts POST { url }, scrapes the target page, runs a
-// multi-module Gemini semantic analysis, and returns structured
-// AnalysisData JSON for the dashboard to consume.
-// ============================================================
-
 import { GoogleGenAI, Type } from "@google/genai";
-import type { AnalysisData } from "@/types";
+import { parseHtml } from "@/lib/parser";
+import { runSeoChecks } from "@/lib/seo-checks";
+import { calculateSeoScore, calculateCategoryScores, getScoreLabel } from "@/lib/scoring";
+import type { AnalysisResult, SeoAuditData, AeoAnalysisData, GeoAnalysisData } from "@/types";
 
 export const dynamic = 'force-dynamic';
 
-// ---------------------------------------------------------------------------
-// 1. Gemini Client Initialization
-// ---------------------------------------------------------------------------
 function getAIClient(): GoogleGenAI {
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    throw new Error(
-      "GEMINI_API_KEY is not configured. Add it to your environment variables."
-    );
+    throw new Error("GEMINI_API_KEY is not configured.");
   }
   return new GoogleGenAI({ apiKey: key });
 }
 
 // ---------------------------------------------------------------------------
-// 2. HTML → Clean Text Extraction
+// Schemas & Prompts
 // ---------------------------------------------------------------------------
-function extractVisibleText(html: string): string {
-  let text = html;
 
-  // Remove everything inside <script>, <style>, <noscript>, <svg>, <iframe>
-  text = text.replace(/<(script|style|noscript|svg|iframe)[^>]*>[\s\S]*?<\/\1>/gi, " ");
-
-  // Remove HTML comments
-  text = text.replace(/<!--[\s\S]*?-->/g, " ");
-
-  // Remove all HTML tags
-  text = text.replace(/<[^>]+>/g, " ");
-
-  // Decode common HTML entities
-  text = text
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&#\d+;/g, " ")
-    .replace(/&\w+;/g, " ");
-
-  // Collapse whitespace
-  text = text.replace(/\s+/g, " ").trim();
-
-  // Truncate to ~15,000 chars to stay within Gemini token budget
-  if (text.length > 15000) {
-    text = text.slice(0, 15000) + "\n\n[...content truncated for analysis...]";
-  }
-
-  return text;
-}
-
-// ---------------------------------------------------------------------------
-// 3. Gemini Response Schema (strict structured output)
-// ---------------------------------------------------------------------------
-const RESPONSE_SCHEMA = {
+const AEO_SCHEMA = {
   type: Type.OBJECT,
   properties: {
-    entityName: { type: Type.STRING, description: "The primary entity/organization/product name identified on the page." },
-    entityType: { type: Type.STRING, description: "Classification: Organization, SaaS Product, E-Commerce, Agency, Blog, etc." },
-    overallScore: { type: Type.NUMBER, description: "Overall AEO/GEO readiness score from 0 to 100." },
-    aeoScore: { type: Type.NUMBER, description: "Answer Engine Optimization score from 0 to 100." },
-    geoScore: { type: Type.NUMBER, description: "Generative Engine Optimization score from 0 to 100." },
-    performanceScore: { type: Type.NUMBER, description: "Estimated content quality/performance score from 0 to 100." },
-
-    // Module 1: De-Jargonization — Entities
+    queryPatterns: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          query: { type: Type.STRING },
+          answerability: { type: Type.STRING }, // 'strong' | 'moderate' | 'weak'
+          recommendation: { type: Type.STRING },
+        },
+        required: ["query", "answerability", "recommendation"]
+      }
+    },
+    voiceSearchReadiness: { type: Type.NUMBER },
+    featuredSnippetEligibility: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          eligible: { type: Type.BOOLEAN },
+          snippetType: { type: Type.STRING },
+          reason: { type: Type.STRING },
+        },
+        required: ["eligible", "snippetType", "reason"]
+      }
+    },
+    faqQuality: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          question: { type: Type.STRING },
+          answer: { type: Type.STRING },
+          score: { type: Type.NUMBER },
+          improvement: { type: Type.STRING },
+        },
+        required: ["question", "answer", "score", "improvement"]
+      }
+    },
+    directAnswerCoverage: { type: Type.NUMBER },
+    contentClarity: { type: Type.NUMBER },
+    personas: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          role: { type: Type.STRING },
+          intent: { type: Type.STRING },
+          painPoints: { type: Type.ARRAY, items: { type: Type.STRING } },
+          engagementTriggers: { type: Type.ARRAY, items: { type: Type.STRING } },
+        },
+        required: ["role", "intent", "painPoints", "engagementTriggers"]
+      }
+    },
+    intents: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          type: { type: Type.STRING },
+          percentage: { type: Type.NUMBER },
+        },
+        required: ["type", "percentage"]
+      }
+    },
+    contentGaps: {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          topic: { type: Type.STRING },
+          priority: { type: Type.STRING },
+          status: { type: Type.STRING },
+          recommendation: { type: Type.STRING },
+        },
+        required: ["topic", "priority", "status", "recommendation"]
+      }
+    },
     entities: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
           name: { type: Type.STRING },
-          type: { type: Type.STRING, description: "Organization, Product, Technology, Topic, Service, Person, etc." },
-          relevance: { type: Type.NUMBER, description: "Relevance weight from 0.0 to 1.0." },
+          type: { type: Type.STRING },
+          relevance: { type: Type.NUMBER },
         },
-        required: ["name", "type", "relevance"],
-      },
-      description: "Top 5-7 semantic entities extracted from the page content.",
-    },
+        required: ["name", "type", "relevance"]
+      }
+    }
+  },
+  required: [
+    "queryPatterns", "voiceSearchReadiness", "featuredSnippetEligibility",
+    "faqQuality", "directAnswerCoverage", "contentClarity", "personas",
+    "intents", "contentGaps", "entities"
+  ]
+};
 
-    // Module 2: Intent & Behavioral Mapping — Personas
-    personas: {
+const GEO_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    citationWorthiness: { type: Type.NUMBER },
+    semanticDensity: { type: Type.NUMBER },
+    factualClaims: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          role: { type: Type.STRING, description: "e.g., Decision Maker (CTO/VP Engineering)" },
-          intent: { type: Type.STRING, description: "e.g., Commercial / Transactional" },
-          painPoints: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 specific pain points this persona would experience." },
-          engagementTriggers: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3 specific engagement triggers that would convert this persona." },
+          claim: { type: Type.STRING },
+          verifiable: { type: Type.BOOLEAN },
+          source: { type: Type.STRING },
         },
-        required: ["role", "intent", "painPoints", "engagementTriggers"],
-      },
-      description: "3 distinct target audience personas.",
+        required: ["claim", "verifiable", "source"]
+      }
     },
-
-    // Module 2: Intent Distribution
-    intents: {
+    authoritySignals: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          type: { type: Type.STRING, description: "e.g., Informational (How it works, Docs)" },
-          percentage: { type: Type.NUMBER, description: "Estimated percentage of traffic intent, must sum to 100." },
+          signal: { type: Type.STRING },
+          present: { type: Type.BOOLEAN },
+          impact: { type: Type.STRING },
         },
-        required: ["type", "percentage"],
-      },
-      description: "4 search intent categories with percentage breakdown summing to 100.",
+        required: ["signal", "present", "impact"]
+      }
     },
-
-    // Module 2: Content Gaps
-    contentGaps: {
+    llmRetrievability: { type: Type.NUMBER },
+    ragCompatibility: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          topic: { type: Type.STRING, description: "The missing or underperforming content topic." },
-          priority: { type: Type.STRING, description: "High, Medium, or Low." },
-          status: { type: Type.STRING, description: "e.g., Missing completely, Poorly optimized for LLMs, Non-semantic HTML structure, Outdated links" },
-          recommendation: { type: Type.STRING, description: "Specific actionable recommendation to fix this gap." },
+          metric: { type: Type.STRING },
+          score: { type: Type.NUMBER },
+          detail: { type: Type.STRING },
         },
-        required: ["topic", "priority", "status", "recommendation"],
-      },
-      description: "4 content gaps identified on the website.",
+        required: ["metric", "score", "detail"]
+      }
     },
-
-    // Module 1/2: Technical Insights
-    technicalInsights: {
+    topicCoverage: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          metric: { type: Type.STRING, description: "e.g., Semantic Heading Nesting, JSON-LD Metadata Schema" },
-          value: { type: Type.STRING, description: "Current state value, e.g., Not Detected, Improper (H3 before H2)" },
-          status: { type: Type.STRING, description: "optimal, warning, or critical" },
-          details: { type: Type.STRING, description: "Detailed explanation of why this matters for AI search engines." },
+          topic: { type: Type.STRING },
+          depth: { type: Type.STRING }, // 'shallow' | 'moderate' | 'comprehensive'
+          recommendation: { type: Type.STRING },
         },
-        required: ["metric", "value", "status", "details"],
-      },
-      description: "4 technical diagnostic insights about the website's AI-readiness.",
+        required: ["topic", "depth", "recommendation"]
+      }
     },
-
-    // Module 5: Payload Generation
-    jsonLdSchema: { type: Type.STRING, description: "Complete JSON-LD schema.org structured data block (raw JSON string, no wrapping script tag)." },
-    faqMarkdown: { type: Type.STRING, description: "LLM-optimized FAQ Markdown block with 3 Q&A pairs using ### and #### headers." },
-    geoCopy: { type: Type.STRING, description: "GEO authority HTML section for site footer/about page with semantic markup." },
-
-    // Module 6: Competitor Compare & Off-Site Strategy
+    payloads: {
+      type: Type.OBJECT,
+      properties: {
+        jsonLd: { type: Type.STRING },
+        faqMarkdown: { type: Type.STRING },
+        geoCopy: { type: Type.STRING },
+      },
+      required: ["jsonLd", "faqMarkdown", "geoCopy"]
+    },
     competitors: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          name: { type: Type.STRING, description: "Name of the competitor." },
-          shareOfVoice: { type: Type.NUMBER, description: "Share of Voice visibility score (0 to 100 integer)." },
-          semanticGaps: {
-            type: Type.ARRAY,
-            items: { type: Type.STRING },
-            description: "Detailed semantic gaps (topical focus points the competitor ranks for that our user is completely missing)."
-          },
-          whyAiPrefers: { type: Type.STRING, description: "Concise summary explaining exactly why the AI prefers them." }
+          name: { type: Type.STRING },
+          shareOfVoice: { type: Type.NUMBER },
+          semanticGaps: { type: Type.ARRAY, items: { type: Type.STRING } },
+          whyAiPrefers: { type: Type.STRING },
         },
         required: ["name", "shareOfVoice", "semanticGaps", "whyAiPrefers"]
-      },
-      description: "List of 2-3 inferred industry market competitors based on the scraped utility context."
+      }
     },
     offSiteStrategy: {
       type: Type.ARRAY,
       items: {
         type: Type.OBJECT,
         properties: {
-          platform: { type: Type.STRING, description: "Platform name (e.g., Reddit, Quora, Dev.to, IndieHackers)." },
-          hubName: { type: Type.STRING, description: "Specific subreddit or channel/forum category (e.g., r/saas, Quora space, Dev.to/webdev)." },
-          objectiveCopy: { type: Type.STRING, description: "Custom, pre-written objective copy tailored for the user to post off-site to build AI citation authority." }
+          platform: { type: Type.STRING },
+          hubName: { type: Type.STRING },
+          objectiveCopy: { type: Type.STRING },
         },
         required: ["platform", "hubName", "objectiveCopy"]
-      },
-      description: "List of 3 targeted external digital hubs with custom pre-written copy."
-    },
+      }
+    }
   },
   required: [
-    "entityName", "entityType", "overallScore", "aeoScore", "geoScore", "performanceScore",
-    "entities", "personas", "intents", "contentGaps", "technicalInsights",
-    "jsonLdSchema", "faqMarkdown", "geoCopy", "competitors", "offSiteStrategy"
-  ],
+    "citationWorthiness", "semanticDensity", "factualClaims", "authoritySignals",
+    "llmRetrievability", "ragCompatibility", "topicCoverage", "payloads",
+    "competitors", "offSiteStrategy"
+  ]
 };
 
-// ---------------------------------------------------------------------------
-// 4. Analysis Prompt
-// ---------------------------------------------------------------------------
-function buildPrompt(url: string, text: string): string {
-  return `You are EXPRESS, an elite AI optimization analyst specializing in AEO (Answer Engine Optimization), GEO (Generative Engine Optimization), and semantic search readiness analysis. You are analyzing a website to assess its visibility and retrievability by AI search engines, LLMs, and conversational assistants.
+function buildAeoPrompt(text: string): string {
+  return `You are an AEO (Answer Engine Optimization) analyst. Evaluate this content for answerability, featured snippets, voice search, FAQs, and intent.
 
-TARGET URL: ${url}
-
-EXTRACTED WEBSITE TEXT:
----
+CONTENT:
 ${text}
----
 
-Execute the following analysis modules in a single pass:
-
-## MODULE 1 — De-Jargonization & Entity Extraction
-- Identify the primary entity name and its type (Organization, SaaS Product, E-Commerce, Agency, Blog, etc.).
-- Extract 5-7 core semantic entities from the content (organizations, products, technologies, topics, services).
-- For each entity, assign a relevance weight (0.0–1.0) based on how central it is to the page's purpose.
-- Translate any vague corporate jargon ("synergy", "leverage", "empower", "next-generation solutions") into precise, ground-truth functional descriptions.
-
-## MODULE 2 — Intent & Behavioral Mapping
-- Profile 3 distinct target audience personas who would search for this website. For each:
-  - Assign a role (e.g., "Decision Maker (CTO/VP Engineering)") and primary intent type.
-  - List 3 specific search pain points they would encounter on this site.
-  - List 3 specific engagement triggers that would convert them.
-- Generate a search intent distribution (4 categories: Informational, Commercial, Transactional, Navigational) with percentages summing to 100.
-- Identify 4 content gaps — missing or underperforming content areas that hurt AI discoverability. For each, assign a priority (High/Medium/Low), current status, and an actionable recommendation.
-- Generate 4 technical diagnostic insights about the site's AI-readiness:
-  - Evaluate: semantic heading hierarchy, JSON-LD/structured data presence, content accessibility for AI crawlers, and content structure/performance.
-  - For each, provide the metric name, current value, status (optimal/warning/critical), and detailed explanation.
-
-## MODULE 5 — Payload Generation
-- Generate a complete, valid JSON-LD schema.org block (as a raw JSON string) appropriate for this entity type. Include proper @context, @type, name, description, and any relevant nested properties.
-- Generate an LLM-optimized FAQ Markdown block with exactly 3 Q&A pairs. Use ### for the section title and #### for each question. Answers should be factual, specific, and directly derived from the website content.
-- Generate a GEO authority HTML section suitable for a site footer or about page. Include semantic HTML tags (<section>, <h2>, <p>, <strong>) with specific, quantified claims derived from or inspired by the content.
-
-## MODULE 6 — Competitor Profiling & Off-Site PR Strategy
-- Systematically infer 2-3 key industry competitors for the target site based on the scraped content and context.
-- For each competitor:
-  - Provide a name.
-  - Calculate an AI "Share of Voice" visibility score (0 to 100 integer) indicating how frequently and positively they are mentioned or cited by AI search engines and RAG pipelines relative to the user.
-  - Detail 3 specific "Semantic Gaps" (topics, keywords, or content focus areas the competitor ranks highly for in LLM knowledge graphs but our user completely lacks).
-  - Summarize exactly "Why the AI prefers them" (concise, data-driven synthesis of their LLM authority edge).
-- Identify 3 targeted external digital hubs (specific Subreddits like r/saas, Quora spaces, Dev.to, or niche business/developer forums) where the user can build AI citation authority.
-- For each hub, write custom, highly objective, value-first copy/posts tailored for the user's product to build credibility and citations in AI training datasets. The copy must sound human, helpful, and completely objective (not promotional or spammy).
-
-## SCORING
-- Assign an overall AEO/GEO readiness score (0–100) based on how well the site currently performs across all modules.
-- Assign individual AEO (Answer Engine Optimization) and GEO (Generative Engine Optimization) scores (0–100).
-- Assign a content quality/performance score (0–100).
-
-Be specific, analytical, and data-driven. Avoid generic filler. Every recommendation must be actionable and every insight must reference observable evidence from the extracted text.`;
+Extract query patterns, evaluate voice search readiness and featured snippet eligibility. Score FAQ quality. Identify personas, intents, content gaps, and entities.
+`;
 }
 
-// ---------------------------------------------------------------------------
-// 5. Transform Gemini response → AnalysisData
-// ---------------------------------------------------------------------------
-interface GeminiResponse {
-  entityName: string;
-  entityType: string;
-  overallScore: number;
-  aeoScore: number;
-  geoScore: number;
-  performanceScore: number;
-  entities: { name: string; type: string; relevance: number }[];
-  personas: { role: string; intent: string; painPoints: string[]; engagementTriggers: string[] }[];
-  intents: { type: string; percentage: number }[];
-  contentGaps: { topic: string; priority: string; status: string; recommendation: string }[];
-  technicalInsights: { metric: string; value: string; status: string; details: string }[];
-  jsonLdSchema: string;
-  faqMarkdown: string;
-  geoCopy: string;
-  competitors: { name: string; shareOfVoice: number; semanticGaps: string[]; whyAiPrefers: string }[];
-  offSiteStrategy: { platform: string; hubName: string; objectiveCopy: string }[];
+function buildGeoPrompt(text: string): string {
+  return `You are a GEO (Generative Engine Optimization) analyst. Evaluate this content for citation worthiness, RAG compatibility, LLM retrievability, and authority signals.
+
+CONTENT:
+${text}
+
+Evaluate citation worthiness, factual claims, and semantic density. Identify topic coverage depth, RAG compatibility. Generate a JSON-LD snippet, an FAQ markdown snippet, and GEO copy. Identify competitors and an off-site strategy hub list.
+`;
 }
 
-function transformResponse(url: string, raw: GeminiResponse): AnalysisData {
-  return {
-    url,
-    score: Math.max(0, Math.min(100, Math.round(raw.overallScore))),
-    marketProfile: {
-      personas: raw.personas.map((p) => ({
-        role: p.role,
-        intent: p.intent,
-        painPoints: Array.isArray(p.painPoints) ? p.painPoints : [],
-        engagementTriggers: Array.isArray(p.engagementTriggers) ? p.engagementTriggers : [],
-      })),
-      intents: raw.intents.map((i) => ({
-        type: i.type,
-        percentage: Math.round(i.percentage),
-      })),
-      contentGaps: raw.contentGaps.map((g) => ({
-        topic: g.topic,
-        priority: (["High", "Medium", "Low"].includes(g.priority) ? g.priority : "Medium") as "High" | "Medium" | "Low",
-        status: g.status,
-        recommendation: g.recommendation,
-      })),
-    },
-    technicalInsights: {
-      performanceScore: Math.max(0, Math.min(100, Math.round(raw.performanceScore))),
-      entities: raw.entities.map((e) => ({
-        name: e.name,
-        type: e.type,
-        relevance: Math.max(0, Math.min(1, e.relevance)),
-      })),
-      insights: raw.technicalInsights.map((t) => ({
-        metric: t.metric,
-        value: t.value,
-        status: (["optimal", "warning", "critical"].includes(t.status) ? t.status : "warning") as "optimal" | "warning" | "critical",
-        details: t.details,
-      })),
-      aeoScore: Math.max(0, Math.min(100, Math.round(raw.aeoScore))),
-      geoScore: Math.max(0, Math.min(100, Math.round(raw.geoScore))),
-    },
-    payloads: {
-      jsonLd: raw.jsonLdSchema,
-      faqMarkdown: raw.faqMarkdown,
-      geoCopy: raw.geoCopy,
-    },
-    competitors: Array.isArray(raw.competitors) ? raw.competitors.map((c) => ({
-      name: c.name || "Unknown Competitor",
-      shareOfVoice: Math.max(0, Math.min(100, Math.round(c.shareOfVoice || 0))),
-      semanticGaps: Array.isArray(c.semanticGaps) ? c.semanticGaps : [],
-      whyAiPrefers: c.whyAiPrefers || "",
-    })) : [],
-    offSiteStrategy: Array.isArray(raw.offSiteStrategy) ? raw.offSiteStrategy.map((h) => ({
-      platform: h.platform || "External Hub",
-      hubName: h.hubName || "General Topic",
-      objectiveCopy: h.objectiveCopy || "",
-    })) : [],
-  };
-}
-
-// ---------------------------------------------------------------------------
-// 6. POST Handler
-// ---------------------------------------------------------------------------
 export async function POST(request: Request) {
   try {
-    // --- Parse & validate request body ---
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body.url !== "string" || !body.url.trim()) {
-      return Response.json(
-        { error: "Missing or invalid 'url' field. Please provide a valid website URL." },
-        { status: 400 }
-      );
+      return Response.json({ error: "Missing or invalid 'url' field." }, { status: 400 });
+    }
+
+    const moduleReq = body.module || 'seo';
+    if (!['seo', 'aeo', 'geo', 'full'].includes(moduleReq)) {
+      return Response.json({ error: "Invalid module." }, { status: 400 });
     }
 
     let targetUrl: string;
     try {
       const raw = body.url.trim();
       targetUrl = raw.startsWith("http") ? raw : `https://${raw}`;
-      new URL(targetUrl); // validate
+      new URL(targetUrl);
     } catch {
-      return Response.json(
-        { error: "Invalid URL format. Please provide a valid URL (e.g., https://example.com)." },
-        { status: 400 }
-      );
+      return Response.json({ error: "Invalid URL format." }, { status: 400 });
     }
 
-    // --- Fetch the target page HTML ---
+    // Fetch the target page HTML
     let html: string;
+    let statusCode: number;
+    const startMs = Date.now();
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 15000);
@@ -366,102 +267,107 @@ export async function POST(request: Request) {
       const pageResponse = await fetch(targetUrl, {
         signal: controller.signal,
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+          Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
           "Accept-Language": "en-US,en;q=0.9",
-          "Accept-Encoding": "gzip, deflate, br, zstd",
-          "Cache-Control": "no-cache",
-          Pragma: "no-cache",
-          "Sec-Ch-Ua":
-            '"Chromium";v="126", "Google Chrome";v="126", "Not-A.Brand";v="8"',
-          "Sec-Ch-Ua-Mobile": "?0",
-          "Sec-Ch-Ua-Platform": '"Windows"',
-          "Sec-Fetch-Dest": "document",
-          "Sec-Fetch-Mode": "navigate",
-          "Sec-Fetch-Site": "none",
-          "Sec-Fetch-User": "?1",
-          "Upgrade-Insecure-Requests": "1",
-          DNT: "1",
         },
       });
 
       clearTimeout(timeout);
+      statusCode = pageResponse.status;
 
       if (!pageResponse.ok) {
-        // Detect aggressive anti-bot blocking (403, 429, Cloudflare 503)
-        const blockedCodes = [403, 429, 503];
-        if (blockedCodes.includes(pageResponse.status)) {
-          return Response.json(
-            {
-              error: `This domain is highly protected (HTTP ${pageResponse.status}). The target website actively blocks automated analysis. Try a different URL, or check if the site uses Cloudflare, Akamai, or similar WAF protection.`,
-            },
-            { status: 422 }
-          );
+        if ([403, 429, 503].includes(statusCode)) {
+          return Response.json({ error: `Domain is highly protected (HTTP ${statusCode}).` }, { status: 422 });
         }
-        return Response.json(
-          { error: `Failed to fetch the target URL. Server responded with status ${pageResponse.status}.` },
-          { status: 502 }
-        );
+        return Response.json({ error: `Failed to fetch target URL. Status ${statusCode}.` }, { status: 502 });
       }
 
       html = await pageResponse.text();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error && err.name === "AbortError"
-          ? "Request timed out after 15 seconds. The target server may be slow or unresponsive."
-          : "Could not connect to the target URL. Please check the address and try again.";
+      return Response.json({ error: "Could not connect to the target URL or request timed out." }, { status: 502 });
+    }
+    const responseTime = Date.now() - startMs;
 
-      return Response.json({ error: message }, { status: 502 });
+    // Parse HTML
+    const parsedPage = parseHtml(html, targetUrl, statusCode, responseTime);
+    const seoIssues = runSeoChecks(parsedPage);
+    const seoScore = calculateSeoScore(seoIssues);
+    
+    let criticalCount = 0, warningCount = 0, goodCount = 0;
+    for (const i of seoIssues) {
+      if (i.severity === 'critical') criticalCount++;
+      else if (i.severity === 'warning') warningCount++;
+      else goodCount++;
     }
 
-    // --- Extract clean text ---
-    const extractedText = extractVisibleText(html);
+    const seoData: SeoAuditData = {
+      url: targetUrl,
+      score: seoScore,
+      scoreLabel: getScoreLabel(seoScore),
+      parsedPage,
+      issues: seoIssues,
+      summary: { critical: criticalCount, warnings: warningCount, good: goodCount, total: seoIssues.length },
+      categoryScores: calculateCategoryScores(seoIssues),
+    };
 
-    if (extractedText.length < 50) {
-      return Response.json(
-        { error: "Could not extract sufficient text content from the page. The site may be heavily JavaScript-rendered or empty." },
-        { status: 422 }
-      );
+    const result: AnalysisResult = {
+      module: moduleReq as 'seo' | 'aeo' | 'geo' | 'full',
+      url: targetUrl,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (moduleReq === 'seo' || moduleReq === 'full') {
+      result.seo = seoData;
     }
 
-    // --- Run Gemini analysis ---
-    let geminiResult: GeminiResponse;
-    try {
-      const response = await getAIClient().models.generateContent({
+    if (moduleReq === 'aeo' || moduleReq === 'full') {
+      const client = getAIClient();
+      const response = await client.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: buildPrompt(targetUrl, extractedText),
+        contents: buildAeoPrompt(parsedPage.textContent),
         config: {
           responseMimeType: "application/json",
-          responseSchema: RESPONSE_SCHEMA,
+          responseSchema: AEO_SCHEMA,
         },
       });
-
-      const text = response.text;
-      if (!text) {
-        throw new Error("Empty response from Gemini API.");
-      }
-
-      geminiResult = JSON.parse(text) as GeminiResponse;
-    } catch (err: unknown) {
-      console.error("[EXPRESS] Gemini API error:", err);
-      const message =
-        err instanceof Error ? err.message : "Unknown Gemini API error.";
-      return Response.json(
-        { error: `AI analysis failed: ${message}` },
-        { status: 500 }
-      );
+      const data = JSON.parse(response.text!) as Omit<AeoAnalysisData, 'url' | 'score' | 'scoreLabel'>;
+      
+      let aeoScore = Math.round((data.voiceSearchReadiness + data.directAnswerCoverage + data.contentClarity) / 3);
+      
+      result.aeo = {
+        url: targetUrl,
+        score: aeoScore,
+        scoreLabel: getScoreLabel(aeoScore),
+        ...data,
+      };
     }
 
-    // --- Transform & respond ---
-    const analysisData = transformResponse(targetUrl, geminiResult);
-    return Response.json(analysisData);
+    if (moduleReq === 'geo' || moduleReq === 'full') {
+      const client = getAIClient();
+      const response = await client.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: buildGeoPrompt(parsedPage.textContent),
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: GEO_SCHEMA,
+        },
+      });
+      const data = JSON.parse(response.text!) as Omit<GeoAnalysisData, 'url' | 'score' | 'scoreLabel'>;
+      
+      let geoScore = Math.round((data.citationWorthiness + data.semanticDensity + data.llmRetrievability) / 3);
+
+      result.geo = {
+        url: targetUrl,
+        score: geoScore,
+        scoreLabel: getScoreLabel(geoScore),
+        ...data,
+      };
+    }
+
+    return Response.json(result);
   } catch (err: unknown) {
     console.error("[EXPRESS] Unhandled route error:", err);
-    return Response.json(
-      { error: "An unexpected server error occurred. Please try again." },
-      { status: 500 }
-    );
+    return Response.json({ error: "An unexpected server error occurred." }, { status: 500 });
   }
 }

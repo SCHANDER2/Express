@@ -1,106 +1,73 @@
-"use client";
+'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { AnalysisData } from "@/types";
-import ReportZone from "../components/ReportZone";
-import PayloadZone from "../components/PayloadZone";
-import OffSiteStrategyZone from "../components/OffSiteStrategyZone";
-import { 
-  Search, 
-  Globe, 
-  Loader2, 
-  CheckCircle2, 
-  Sparkles, 
-  Cpu, 
-  Layers, 
-  ArrowRight, 
-  ShieldAlert,
-  Zap,
-  RefreshCw,
-  AlertTriangle
-} from "lucide-react";
+import { AnalysisResult } from "@/types";
+import SeoAuditReport from "../components/SeoAuditReport";
+import AeoReport from "../components/AeoReport";
+import GeoReport from "../components/GeoReport";
+import ScoreGauge from "../components/ScoreGauge";
+import { Search, Globe, MessageSquare, Layers, Loader2, RefreshCw, ArrowRight, ShieldAlert, AlertTriangle, CheckCircle2 } from "lucide-react";
 
-const PIPELINE_STEPS = [
-  {
-    title: "Crawling HTML & DOM Structure",
-    desc: "Fetching page markup, resolving canonical URLs, and measuring Core Web Vitals...",
-    icon: Globe,
-  },
-  {
-    title: "Extracting Semantic Entity Map",
-    desc: "Running Natural Language Processing (NLP) to classify organizational schemas & key keywords...",
-    icon: Cpu,
-  },
-  {
-    title: "Evaluating Voice & AEO Context",
-    desc: "Testing query patterns against conversational schema standards and LLM vector embeddings...",
-    icon: Layers,
-  },
-  {
-    title: "Compiling Optimization Payloads",
-    desc: "Generating bespoke JSON-LD schemas, AEO FAQ markdown, and GEO authority sections...",
-    icon: Sparkles,
-  },
-];
+const PIPELINE_STEPS = {
+  seo: [
+    { title: "Crawling DOM", desc: "Fetching HTML and resolving links...", icon: Globe },
+    { title: "Running 50+ Checks", desc: "Validating meta, structure, and perf...", icon: Search },
+    { title: "Compiling SEO Score", desc: "Generating final audit report...", icon: CheckCircle2 }
+  ],
+  aeo: [
+    { title: "Analyzing Queries", desc: "Extracting voice search intent...", icon: MessageSquare },
+    { title: "Checking FAQs", desc: "Evaluating clarity and markup...", icon: Search },
+    { title: "Generating AEO Score", desc: "Formatting answerability matrix...", icon: CheckCircle2 }
+  ],
+  geo: [
+    { title: "Retrieving Vectors", desc: "Analyzing semantic density...", icon: Layers },
+    { title: "Checking Citations", desc: "Evaluating factual claims...", icon: Globe },
+    { title: "Calculating GEO Score", desc: "Generating RAG metrics...", icon: CheckCircle2 }
+  ],
+  full: [
+    { title: "Initializing Engine", desc: "Starting full diagnostic suite...", icon: Loader2 },
+    { title: "SEO Audit", desc: "Running technical crawls...", icon: Globe },
+    { title: "AEO Analysis", desc: "Evaluating voice readiness...", icon: MessageSquare },
+    { title: "GEO Diagnostics", desc: "Checking RAG compatibility...", icon: Layers },
+    { title: "Finalizing", desc: "Compiling complete dashboard...", icon: CheckCircle2 }
+  ]
+};
 
 const SIMULATED_LOGS = [
-  "[system] Initializing EXPRESS pipeline v1.4.0...",
+  "[system] Initializing EXPRESS pipeline v2.0...",
   "[crawler] Connecting to domain target host...",
-  "[crawler] Sending request: GET / HTTP/1.1...",
-  "[crawler] Success: Host resolved, status code 200.",
-  "[crawler] Extracting DOM structure...",
-  "[crawler] Detected 143 headings, 8 tables, 4 forms.",
-  "[crawler] Performance audit completed: LCP=2.8s, CLS=0.02.",
-  "[nlp] Tokenizing body copy, preparing NLP input stream...",
-  "[nlp] Running semantic vector classification...",
-  "[nlp] Mapping keyword associations to UCSC ontology catalog...",
-  "[nlp] Found Entity: Organization (Relevance Weight: 0.98)",
-  "[nlp] Found Entity: SaaS Product (Relevance Weight: 0.89)",
-  "[nlp] Found Entity: API Integration (Relevance Weight: 0.82)",
-  "[nlp] Found Entity: Generative AI (Relevance Weight: 0.74)",
-  "[aeo] Evaluating accessibility scores for conversational search...",
-  "[aeo] Checking schema configurations (JSON-LD, Microdata)...",
-  "[aeo] Warning: Missing Product schema markup.",
-  "[geo] Evaluating RAG indexing compatibility...",
-  "[geo] Structuring conversational FAQ markdown payload...",
-  "[competitors] Analysing market semantic footprint...",
-  "[competitors] Inferred 3 primary domain competitors.",
-  "[competitors] Deficit identified: semantic gaps detected.",
-  "[offsite] Compiling digital PR hub vector matrix...",
-  "[offsite] Generated 3 targeted value post payloads.",
-  "[system] Compiling payload generation assets...",
-  "[system] Deployment payloads generated successfully."
+  "[system] Analyzing payload structure...",
+  "[nlp] Extracting entities and intent patterns...",
+  "[eval] Running scoring heuristics...",
+  "[system] Dashboard preparation complete."
 ];
 
 export default function Home() {
   const [url, setUrl] = useState("");
+  const [module, setModule] = useState<'seo' | 'aeo' | 'geo' | 'full'>('full');
   const [error, setError] = useState("");
   const [apiError, setApiError] = useState("");
   const [status, setStatus] = useState<"idle" | "analyzing" | "completed">("idle");
   const [currentStep, setCurrentStep] = useState(0);
-  const [analysisData, setAnalysisData] = useState<AnalysisData | null>(null);
-  const [activeTab, setActiveTab] = useState<"market" | "technical" | "payloads" | "offsite">("market");
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [activeTab, setActiveTab] = useState<'seo' | 'aeo' | 'geo' | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
-
+  
   const logEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Auto-run stepper during analysis phase (visual animation only)
+  const steps = PIPELINE_STEPS[module];
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
-    if (status === "analyzing") {
-      if (currentStep < PIPELINE_STEPS.length) {
-        timer = setTimeout(() => {
-          setCurrentStep((prev) => prev + 1);
-        }, 1100);
-      }
-      // Note: we no longer transition to "completed" here.
-      // The fetch callback handles that when the API responds.
+    if (status === "analyzing" && currentStep < steps.length) {
+      timer = setTimeout(() => {
+        setCurrentStep(prev => prev + 1);
+      }, 900);
     }
     return () => clearTimeout(timer);
-  }, [status, currentStep]);
+  }, [status, currentStep, steps.length]);
 
-  // Live log simulation stream (visual feedback during API call)
   useEffect(() => {
     let logInterval: NodeJS.Timeout;
     if (status === "analyzing") {
@@ -108,450 +75,260 @@ export default function Home() {
       let logIndex = 0;
       logInterval = setInterval(() => {
         if (logIndex < SIMULATED_LOGS.length) {
-          setLogs((prev) => [...prev, SIMULATED_LOGS[logIndex]]);
+          setLogs(prev => [...prev, SIMULATED_LOGS[logIndex]]);
           logIndex++;
-        } else {
-          clearInterval(logInterval);
         }
-      }, 190); // Stream log lines quickly
+      }, 250);
     }
     return () => clearInterval(logInterval);
   }, [status]);
 
-  // Auto scroll logs
   useEffect(() => {
     if (logEndRef.current) {
       logEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [logs]);
 
-  // Core analysis handler — calls the live /api/analyze endpoint
-  const handleAnalyze = useCallback(async (e: React.FormEvent) => {
+  const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setApiError("");
 
     if (!url) {
-      setError("Please provide a website URL to begin analysis.");
+      setError("Please provide a website URL.");
       return;
     }
-
-    let normalizedUrl: string;
+    
+    let normalizedUrl = url;
     try {
-      const parsedUrl = new URL(url.startsWith("http") ? url : `https://${url}`);
-      normalizedUrl = parsedUrl.toString();
+      normalizedUrl = new URL(url.startsWith("http") ? url : `https://${url}`).toString();
       setUrl(normalizedUrl);
     } catch {
-      setError("Please enter a valid website URL (e.g., https://yourwebsite.com).");
+      setError("Invalid URL.");
       return;
     }
 
-    // Cancel any previous in-flight request
-    if (abortRef.current) {
-      abortRef.current.abort();
-    }
+    if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    // Reset state and start analysis
     setCurrentStep(0);
-    setAnalysisData(null);
+    setResult(null);
     setStatus("analyzing");
 
     try {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: normalizedUrl }),
+        body: JSON.stringify({ url: normalizedUrl, module }),
         signal: controller.signal,
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Analysis failed");
 
-      if (!response.ok) {
-        throw new Error(data.error || `Server responded with status ${response.status}`);
-      }
+      setCurrentStep(steps.length);
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      // Ensure stepper completes visually before showing results
-      setCurrentStep(PIPELINE_STEPS.length);
+      setResult(data as AnalysisResult);
+      if (data.seo) setActiveTab('seo');
+      else if (data.aeo) setActiveTab('aeo');
+      else if (data.geo) setActiveTab('geo');
       
-      // Small delay so the user sees the final stepper step complete
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
-      setAnalysisData(data as AnalysisData);
       setStatus("completed");
-      setActiveTab("market");
     } catch (err: unknown) {
-      if (err instanceof Error && err.name === "AbortError") {
-        return; // Request was intentionally cancelled
-      }
-
-      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
-      setApiError(message);
+      if (err instanceof Error && err.name === "AbortError") return;
+      setApiError(err instanceof Error ? err.message : "Unexpected error");
       setStatus("idle");
     } finally {
-      if (abortRef.current === controller) {
-        abortRef.current = null;
-      }
+      if (abortRef.current === controller) abortRef.current = null;
     }
-  }, [url]);
+  };
+
+  const getOverallScore = () => {
+    if (!result) return 0;
+    const scores = [];
+    if (result.seo) scores.push(result.seo.score);
+    if (result.aeo) scores.push(result.aeo.score);
+    if (result.geo) scores.push(result.geo.score);
+    if (scores.length === 0) return 0;
+    return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
+  };
 
   return (
-    <div className="dot-grid min-h-screen flex flex-col justify-between relative bg-bg-main font-sans text-text-primary">
+    <div className="dot-grid min-h-screen flex flex-col bg-bg-main font-sans text-text-primary">
       
-      {/* Soft light-mode glowing background accent blobs */}
-      <div className="absolute top-[-5%] left-[-5%] w-[40%] h-[40%] bg-brand-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-5%] w-[50%] h-[50%] bg-brand-accent/5 rounded-full blur-[140px] pointer-events-none"></div>
+      {/* Top Nav for Completed State */}
+      {status === "completed" && (
+        <nav className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200 py-3 px-6 flex items-center justify-between shadow-sm">
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setStatus("idle"); setUrl(""); setResult(null); }}>
+            <span className="w-8 h-8 rounded bg-brand-primary flex items-center justify-center text-white font-black text-sm">EX</span>
+            <span className="font-extrabold tracking-tight text-lg hidden sm:block">EXPRESS</span>
+          </div>
+          
+          <form onSubmit={handleAnalyze} className="flex-1 max-w-xl mx-4 flex bg-slate-50 border border-slate-200 rounded-lg p-1">
+            <input type="text" value={url} onChange={e => setUrl(e.target.value)} className="bg-transparent border-none outline-none w-full px-3 text-sm font-medium" />
+            <button type="submit" className="bg-brand-primary text-white px-4 py-1.5 rounded-md text-xs font-bold flex items-center gap-1">
+              <RefreshCw className="w-3 h-3" /> Retry
+            </button>
+          </form>
 
-      {/* GLOBAL STICKY TOPBAR HEADER */}
-      <nav className="sticky top-0 z-50 w-full bg-white/90 backdrop-blur-md border-b border-slate-200/80 py-4 px-6 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm shadow-slate-100/5">
-        {/* Left: Brand Logo */}
-        <div 
-          className="flex items-center gap-2.5 cursor-pointer select-none group" 
-          onClick={() => { setStatus("idle"); setUrl(""); setAnalysisData(null); setApiError(""); }}
-          title="Return to home page"
-        >
-          <span className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white font-extrabold text-sm shadow-md shadow-brand-primary/20 group-hover:bg-cyan-600 transition-colors">
-            EX
-          </span>
-          <span className="font-extrabold tracking-tight text-text-primary text-lg">EXPRESS</span>
-          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-4xs font-bold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 uppercase tracking-wider">
-            Pipeline
-          </span>
-        </div>
+          <div className="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+            <span className="text-[10px] uppercase font-bold text-slate-500">Overall</span>
+            <span className="text-sm font-black text-brand-primary">{getOverallScore()}</span>
+          </div>
+        </nav>
+      )}
 
-        {/* Center: Sticky Search bar (Active when not idle) */}
-        {status !== "idle" && (
-          <div className="w-full max-w-xl animate-fade-in">
-            <form 
-              onSubmit={handleAnalyze} 
-              className="flex gap-2 bg-white border border-slate-200 p-1.5 rounded-xl focus-within:border-brand-primary focus-within:ring-2 focus-within:ring-brand-primary/10 transition-all shadow-sm"
-            >
-              <div className="flex-1 flex items-center gap-2 px-3">
-                <Globe className="w-4 h-4 text-text-secondary flex-shrink-0" />
+      <main className="flex-1 flex flex-col items-center py-12 px-4 relative z-10 w-full">
+        
+        {/* IDLE STATE */}
+        {status === "idle" && (
+          <div className="w-full max-w-4xl flex flex-col items-center text-center animate-fade-in mt-12">
+            <div className="w-12 h-12 rounded-xl bg-brand-primary flex items-center justify-center text-white font-black text-2xl shadow-lg mb-6">EX</div>
+            <h1 className="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 mb-4">Complete Website Diagnostic Platform</h1>
+            <p className="text-lg text-slate-600 mb-12 max-w-2xl">SEO · AEO · GEO Analysis for AI-Ready Websites.</p>
+
+            <form onSubmit={handleAnalyze} className="w-full max-w-2xl flex flex-col gap-8">
+              <div className="flex bg-white p-2 rounded-2xl shadow-sm border border-slate-200 focus-within:border-brand-primary focus-within:ring-4 focus-within:ring-brand-primary/10 transition-all">
                 <input
                   type="text"
-                  disabled={status === "analyzing"}
                   placeholder="https://yourwebsite.com"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  className="bg-transparent border-0 outline-none w-full text-sm text-text-primary font-bold focus:ring-0 placeholder-text-secondary/60 py-1"
+                  className="flex-1 bg-transparent border-0 outline-none px-4 py-3 text-lg font-medium placeholder-slate-400"
                 />
+                <button type="submit" className="bg-brand-primary hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-colors flex items-center gap-2">
+                  Analyze <ArrowRight className="w-4 h-4" />
+                </button>
               </div>
-              <button
-                type="submit"
-                disabled={status === "analyzing"}
-                className="px-4 py-1.5 rounded-lg bg-brand-primary hover:bg-cyan-600 text-white text-xs font-bold transition-all active:scale-98 disabled:opacity-50 flex items-center gap-1.5 shadow-md shadow-brand-primary/15 cursor-pointer"
-              >
-                {status === "analyzing" ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
-                ) : (
-                  <RefreshCw className="w-3.5 h-3.5" />
-                )}
-                <span>{status === "analyzing" ? "Running" : "Re-Analyze"}</span>
-              </button>
+
+              {error && <div className="text-red-500 text-sm font-bold flex items-center justify-center gap-1"><ShieldAlert className="w-4 h-4" /> {error}</div>}
+              {apiError && <div className="text-red-500 text-sm font-bold flex items-center justify-center gap-1"><AlertTriangle className="w-4 h-4" /> {apiError}</div>}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                <div onClick={() => setModule('seo')} className={`p-5 rounded-xl border cursor-pointer transition-all ${module === 'seo' ? 'border-brand-primary bg-blue-50 ring-1 ring-brand-primary' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <Search className={`w-6 h-6 mb-3 ${module === 'seo' ? 'text-brand-primary' : 'text-slate-400'}`} />
+                  <h3 className="font-bold text-slate-900 mb-1">SEO Audit</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">50+ technical checks, meta analysis, content structure, security & performance diagnostics</p>
+                </div>
+                <div onClick={() => setModule('aeo')} className={`p-5 rounded-xl border cursor-pointer transition-all ${module === 'aeo' ? 'border-brand-accent bg-purple-50 ring-1 ring-brand-accent' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <MessageSquare className={`w-6 h-6 mb-3 ${module === 'aeo' ? 'text-brand-accent' : 'text-slate-400'}`} />
+                  <h3 className="font-bold text-slate-900 mb-1">AEO Analysis</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">Answer engine optimization, voice search readiness, featured snippet eligibility, FAQ quality</p>
+                </div>
+                <div onClick={() => setModule('geo')} className={`p-5 rounded-xl border cursor-pointer transition-all ${module === 'geo' ? 'border-green-500 bg-green-50 ring-1 ring-green-500' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <Globe className={`w-6 h-6 mb-3 ${module === 'geo' ? 'text-green-600' : 'text-slate-400'}`} />
+                  <h3 className="font-bold text-slate-900 mb-1">GEO Analysis</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">Generative engine optimization, citation worthiness, RAG compatibility, semantic density</p>
+                </div>
+                <div onClick={() => setModule('full')} className={`p-5 rounded-xl border cursor-pointer transition-all ${module === 'full' ? 'border-brand-primary bg-blue-50 ring-1 ring-brand-primary' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
+                  <Layers className={`w-6 h-6 mb-3 ${module === 'full' ? 'text-brand-primary' : 'text-slate-400'}`} />
+                  <h3 className="font-bold text-slate-900 mb-1">Full Analysis</h3>
+                  <p className="text-xs text-slate-500 leading-relaxed">Complete end-to-end diagnostic — SEO + AEO + GEO combined</p>
+                </div>
+              </div>
             </form>
           </div>
         )}
 
-        {/* Right: Operational Status */}
-        <div className="flex items-center gap-2 bg-slate-100/60 px-3.5 py-1.5 rounded-lg border border-slate-200/50">
-          <span className="w-2.5 h-2.5 rounded-full bg-state-success animate-pulse"></span>
-          <span className="text-4xs font-bold text-text-secondary uppercase tracking-widest select-none">
-            Systems Operational
-          </span>
-        </div>
-      </nav>
-
-      {/* WORKSPACE AREA */}
-      <main className="flex-1 flex flex-col items-center py-12 relative z-10 w-full">
-        
-        {/* 1. IDLE STATE */}
-        {status === "idle" && (
-          <div className="w-full max-w-5xl px-6 tab-fade-in flex flex-col items-center">
-            
-            {/* Centered Hero Header - Block container with mx-auto to prevent collapsing */}
-            <div className="w-full text-center mb-12 select-none">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-primary/10 text-brand-primary text-xs font-bold border border-brand-primary/20 mb-6 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 animate-pulse text-brand-accent" />
-                <span>Generative, Voice & Vector Optimization Pipeline</span>
-              </div>
-              
-              {/* EXPRESS title in CRED bold uppercase typography, Slate-to-Orange gradient */}
-              <h1 className="text-6xl md:text-8xl font-black tracking-widest uppercase mb-4 bg-clip-text text-transparent bg-gradient-to-r from-[#0F172A] via-[#0F172A] to-[#F97316]">
-                EXPRESS
-              </h1>
-              
-              {/* Horizontal subtitle paragraph with max-w-xl mx-auto block centering */}
-              <p className="text-sm md:text-base text-text-secondary w-full max-w-xl mx-auto font-medium tracking-wide leading-relaxed">
-                Analyze your website alignment against AI crawlers, natural language parsing layers, and vector search engines.
-              </p>
-            </div>
-
-            {/* URL Input Box */}
-            <div className="w-full max-w-2xl mb-8">
-              <form 
-                onSubmit={handleAnalyze} 
-                className="bg-white p-2.5 rounded-2xl flex flex-col sm:flex-row gap-2 shadow-md border border-slate-200 transition-all duration-200 focus-within:border-brand-primary focus-within:ring-4 focus-within:ring-brand-primary/10"
-              >
-                <div className="flex-1 flex items-center gap-3 px-3 py-2 sm:py-0">
-                  <Globe className="w-5 h-5 text-brand-primary flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="https://yourwebsite.com"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className="bg-transparent border-0 outline-none w-full text-sm sm:text-base placeholder-text-secondary text-text-primary font-bold focus:ring-0"
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  className="px-6 py-3.5 rounded-xl bg-brand-primary text-white text-sm font-bold tracking-wide transition-all active:scale-98 shadow-md shadow-brand-primary/20 hover:bg-cyan-600 cursor-pointer flex items-center justify-center gap-1.5 group"
-                >
-                  <span>Analyze Website</span>
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
-                </button>
-              </form>
-
-              {/* Input validation error */}
-              {error && (
-                <div className="mt-3 flex items-center gap-2 text-state-error text-xs px-2 animate-scale-in">
-                  <ShieldAlert className="w-4 h-4 flex-shrink-0" />
-                  <span className="font-semibold">{error}</span>
-                </div>
-              )}
-
-              {/* API / backend error */}
-              {apiError && (
-                <div className="mt-4 animate-scale-in bg-red-50 border border-red-200 rounded-2xl p-4 shadow-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-red-100 border border-red-200 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <AlertTriangle className="w-4.5 h-4.5 text-red-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-red-800 mb-1">Analysis Failed</h4>
-                      <p className="text-xs text-red-600 leading-relaxed">{apiError}</p>
-                    </div>
-                    <button
-                      onClick={() => setApiError("")}
-                      className="text-red-400 hover:text-red-600 transition-colors p-1 cursor-pointer flex-shrink-0"
-                      title="Dismiss error"
-                    >
-                      <span className="text-lg leading-none">&times;</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-        )}
-
-        {/* 2. ANALYZING STATE */}
+        {/* ANALYZING STATE */}
         {status === "analyzing" && (
-          <div className="w-full max-w-6xl px-6 tab-fade-in grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Left: Progress Stepper */}
-            <div className="lg:col-span-5 bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200/60 flex flex-col gap-6">
-              <h3 className="text-xs font-bold text-text-primary uppercase tracking-wider mb-2 flex items-center gap-2 select-none">
-                <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
-                Optimization Engine Stepper
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-8 mt-12 animate-fade-in">
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-6">
+              <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin text-brand-primary" /> Running Analysis
               </h3>
-
-              <div className="flex flex-col gap-6">
-                {PIPELINE_STEPS.map((step, idx) => {
-                  const StepIcon = step.icon;
-                  const isCompleted = idx < currentStep;
+              <div className="flex flex-col gap-4">
+                {steps.map((step, idx) => {
                   const isActive = idx === currentStep;
-
+                  const isDone = idx < currentStep;
+                  const Icon = step.icon;
                   return (
-                    <div 
-                      key={idx} 
-                      className={`flex gap-4 transition-opacity duration-300 ${
-                        isCompleted ? "opacity-100" : isActive ? "opacity-100" : "opacity-40"
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                          isCompleted ? "bg-brand-primary/10 border-brand-primary/30 text-brand-primary" :
-                          isActive ? "bg-brand-primary/10 border-brand-primary text-brand-accent animate-pulse shadow-sm" :
-                          "bg-slate-105 border-slate-200 text-text-secondary"
-                        }`}>
-                          {isCompleted ? (
-                            <CheckCircle2 className="w-4.5 h-4.5 text-state-success" />
-                          ) : (
-                            <StepIcon className="w-4 h-4" />
-                          )}
-                        </div>
-                        
-                        {idx < PIPELINE_STEPS.length - 1 && (
-                          <div className={`w-0.5 h-10 mt-1 transition-all duration-550 ${
-                            isCompleted ? "bg-brand-primary/30" : "bg-slate-200"
-                          }`}></div>
-                        )}
+                    <div key={idx} className={`flex items-start gap-4 transition-opacity ${isActive || isDone ? 'opacity-100' : 'opacity-40'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${isDone ? 'bg-green-100 text-green-600' : isActive ? 'bg-blue-100 text-brand-primary' : 'bg-slate-100 text-slate-400'}`}>
+                        <Icon className="w-4 h-4" />
                       </div>
-
-                      <div className="flex-1 pt-0.5">
-                        <h4 className={`text-xs sm:text-sm font-bold tracking-wide transition-colors duration-300 ${
-                          isCompleted ? "text-text-primary" : isActive ? "text-brand-primary" : "text-text-secondary"
-                        }`}>
-                          {step.title}
-                        </h4>
-                        <p className="text-3xs sm:text-2xs text-text-secondary mt-0.5 leading-relaxed">
-                          {step.desc}
-                        </p>
+                      <div>
+                        <div className={`text-sm font-bold ${isActive ? 'text-brand-primary' : 'text-slate-700'}`}>{step.title}</div>
+                        <div className="text-xs text-slate-500">{step.desc}</div>
                       </div>
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Loader bottom bar */}
-              <div className="bg-slate-100 h-1.5 w-full rounded-full overflow-hidden border border-slate-200/60 mt-4">
-                <div 
-                  className="h-full bg-brand-primary transition-all duration-550 ease-out"
-                  style={{ width: `${(currentStep / PIPELINE_STEPS.length) * 100}%` }}
-                ></div>
               </div>
             </div>
-
-            {/* Right: Operational Log Terminal */}
-            <div className="lg:col-span-7 bg-slate-950 rounded-2xl shadow-xl overflow-hidden border border-slate-905 flex flex-col h-[400px]">
-              <header className="bg-slate-900 px-5 py-3.5 flex items-center justify-between border-b border-slate-850">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-state-error/70 block"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-state-warning/70 block"></span>
-                    <span className="w-2.5 h-2.5 rounded-full bg-state-success/70 block"></span>
-                  </div>
-                  <span className="text-3xs font-mono text-slate-400 ml-2">crawler-parser-logs.sh</span>
-                </div>
-                <span className="text-4xs font-mono text-brand-primary tracking-widest animate-pulse">STREAMING</span>
-              </header>
-
-              <div className="flex-1 p-5 font-mono text-3xs sm:text-2xs text-slate-350 overflow-y-auto space-y-2 log-scrollbar bg-slate-955">
-                {logs.map((log, index) => {
-                  let isSuccess = log.includes("[SUCCESS]") || log.includes("success");
-                  let isWarning = log.includes("[WARNING]");
-                  let isSystem = log.includes("[system]");
-                  
-                  return (
-                    <div 
-                      key={index}
-                      className={`leading-relaxed whitespace-pre-wrap transition-opacity duration-150 animate-fade-in ${
-                        isSuccess ? "text-emerald-450" :
-                        isWarning ? "text-brand-accent" :
-                        isSystem ? "text-brand-primary font-bold" : "text-slate-350"
-                      }`}
-                    >
-                      {log}
-                    </div>
-                  );
-                })}
+            <div className="bg-slate-900 rounded-2xl shadow-xl overflow-hidden flex flex-col h-[400px]">
+              <div className="bg-slate-950 px-4 py-2 border-b border-slate-800 flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-xs text-slate-500 font-mono ml-2">terminal</span>
+              </div>
+              <div className="flex-1 p-4 font-mono text-xs text-green-400 overflow-y-auto whitespace-pre-wrap">
+                {logs.map((l, i) => <div key={i}>{l}</div>)}
                 <div ref={logEndRef} />
               </div>
             </div>
-
           </div>
         )}
 
-        {/* 3. COMPLETED STATE */}
-        {status === "completed" && analysisData && (
-          <div className="w-full flex flex-col gap-8 tab-fade-in">
+        {/* COMPLETED STATE */}
+        {status === "completed" && result && (
+          <div className="w-full max-w-7xl animate-fade-in flex flex-col gap-8">
             
-            {/* Workspace Dashboard Tabselector Bar */}
-            <div className="w-full max-w-7xl mx-auto px-6">
-              <div className="bg-white border border-slate-200 p-1.5 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                
-                {/* Left: Domain Indicator */}
-                <div className="flex items-center gap-3 px-3">
-                  <div className="p-2 bg-brand-primary/10 text-brand-primary rounded-xl border border-brand-primary/20">
-                    <Globe className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold text-text-primary">{analysisData.url}</h3>
-                    <p className="text-4xs font-mono text-text-secondary uppercase tracking-widest mt-0.5">Workspace Active</p>
-                  </div>
-                </div>
-
-                {/* Center: Tab buttons */}
-                <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200/50">
-                  <button
-                    onClick={() => setActiveTab("market")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
-                      activeTab === "market"
-                        ? "bg-white text-text-primary shadow-sm border border-slate-200"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    <span>📊 Market & Intent</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("technical")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
-                      activeTab === "technical"
-                        ? "bg-white text-text-primary shadow-sm border border-slate-200"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    <span>⚙️ Technical Audit</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("payloads")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
-                      activeTab === "payloads"
-                        ? "bg-white text-text-primary shadow-sm border border-slate-200"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    <span>💾 Deploy Payloads</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("offsite")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold tracking-wide transition-all active:scale-98 cursor-pointer ${
-                      activeTab === "offsite"
-                        ? "bg-white text-text-primary shadow-sm border border-slate-200"
-                        : "text-text-secondary hover:text-text-primary"
-                    }`}
-                  >
-                    <span>🚀 Off-Site Strategy</span>
-                  </button>
-                </div>
-
-                {/* Right: Score Summary */}
-                <div className="hidden sm:flex items-center gap-4 pr-3 text-xs border-l border-slate-200 pl-6">
-                  <div className="text-center">
-                    <span className="text-4xs uppercase tracking-widest text-text-secondary block">Overall Score</span>
-                    <span className="font-extrabold text-brand-primary text-sm">{analysisData.score}/100</span>
-                  </div>
-                </div>
-              </div>
+            {/* Score Overview */}
+            <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-center gap-12">
+              {result.module === 'full' ? (
+                <>
+                  {result.seo && <ScoreGauge score={result.seo.score} label="SEO Score" />}
+                  {result.aeo && <ScoreGauge score={result.aeo.score} label="AEO Score" />}
+                  {result.geo && <ScoreGauge score={result.geo.score} label="GEO Score" />}
+                </>
+              ) : (
+                <>
+                  {result.module === 'seo' && result.seo && <ScoreGauge score={result.seo.score} label="SEO Score" size="lg" />}
+                  {result.module === 'aeo' && result.aeo && <ScoreGauge score={result.aeo.score} label="AEO Score" size="lg" />}
+                  {result.module === 'geo' && result.geo && <ScoreGauge score={result.geo.score} label="GEO Score" size="lg" />}
+                </>
+              )}
             </div>
 
-            {/* Tab Panels */}
-            {activeTab === "market" && (
-              <ReportZone data={analysisData} activeTab="market" />
-            )}
-            {activeTab === "technical" && (
-              <ReportZone data={analysisData} activeTab="technical" />
-            )}
-            {activeTab === "payloads" && (
-              <PayloadZone data={analysisData} />
-            )}
-            {activeTab === "offsite" && (
-              <OffSiteStrategyZone data={analysisData} />
-            )}
+            {/* Tab Navigation */}
+            <div className="flex items-center justify-center gap-2 bg-slate-100 p-1.5 rounded-xl self-center border border-slate-200">
+              {result.seo && (
+                <button onClick={() => setActiveTab('seo')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'seo' ? 'bg-white shadow text-brand-primary' : 'text-slate-500 hover:text-slate-700'}`}>
+                  SEO Audit
+                </button>
+              )}
+              {result.aeo && (
+                <button onClick={() => setActiveTab('aeo')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'aeo' ? 'bg-white shadow text-brand-accent' : 'text-slate-500 hover:text-slate-700'}`}>
+                  AEO Analysis
+                </button>
+              )}
+              {result.geo && (
+                <button onClick={() => setActiveTab('geo')} className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'geo' ? 'bg-white shadow text-green-600' : 'text-slate-500 hover:text-slate-700'}`}>
+                  GEO Analysis
+                </button>
+              )}
+            </div>
+
+            {/* Report Content */}
+            <div className="w-full">
+              {activeTab === 'seo' && result.seo && <SeoAuditReport data={result.seo} />}
+              {activeTab === 'aeo' && result.aeo && <AeoReport data={result.aeo} />}
+              {activeTab === 'geo' && result.geo && <GeoReport data={result.geo} />}
+            </div>
+
           </div>
         )}
-
       </main>
-
-      {/* FOOTER */}
-      <footer className="w-full text-center py-8 border-t border-slate-200 bg-white text-3xs text-text-secondary relative z-10 flex flex-col items-center gap-1.5">
-        <p>© {new Date().getFullYear()} EXPRESS Pipeline. Zero-friction AEO, GEO, and SEO optimization.</p>
-        <p className="text-text-secondary/40 font-mono tracking-widest uppercase">STATUS: SYSTEMS_OPERATIONAL // VER: 1.4.0</p>
-      </footer>
+      
+      {status === 'idle' && (
+        <footer className="w-full text-center py-6 text-slate-400 text-xs border-t border-slate-200 bg-white z-10">
+          © {new Date().getFullYear()} EXPRESS Pipeline. Zero-friction analysis.
+        </footer>
+      )}
     </div>
   );
 }

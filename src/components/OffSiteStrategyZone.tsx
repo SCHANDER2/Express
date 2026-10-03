@@ -1,13 +1,16 @@
+'use client';
+
 import React, { useState } from "react";
-import { AnalysisData } from "@/types";
+import { AnalysisData, OffSiteHub } from "@/types";
 import { Share2, Copy, Check, ExternalLink, CheckSquare, Square } from "lucide-react";
 
 interface OffSiteStrategyZoneProps {
-  data: AnalysisData;
+  data?: AnalysisData;
+  offSiteStrategy?: OffSiteHub[];
 }
 
-export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) {
-  const { offSiteStrategy } = data;
+export default function OffSiteStrategyZone({ data, offSiteStrategy: propOffSiteStrategy }: OffSiteStrategyZoneProps) {
+  const offSiteStrategy = propOffSiteStrategy || data?.offSiteStrategy;
   const [completedHubs, setCompletedHubs] = useState<Record<number, boolean>>({});
   const [copiedStates, setCopiedStates] = useState<Record<number, boolean>>({});
 
@@ -30,6 +33,8 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
     }
   };
 
+  if (!offSiteStrategy) return null;
+
   return (
     <section 
       id="offsite-strategy-zone" 
@@ -50,19 +55,18 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
           </div>
           
           <div className="bg-slate-100 border border-slate-200/50 px-4 py-2 rounded-xl flex items-center gap-3 self-start sm:self-center select-none">
-            <span className="text-2xs font-bold text-text-secondary uppercase tracking-widest">Progress</span>
+            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-widest">Progress</span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-extrabold text-brand-primary">
-                {Object.values(completedHubs).filter(Boolean).length} / {offSiteStrategy ? offSiteStrategy.length : 0}
+                {Object.values(completedHubs).filter(Boolean).length} / {offSiteStrategy.length}
               </span>
-              <span className="text-3xs text-text-secondary uppercase">Hubs Cited</span>
+              <span className="text-[9px] text-text-secondary uppercase">Hubs Cited</span>
             </div>
           </div>
         </header>
 
-        {/* Task Board / List */}
         <div className="grid grid-cols-1 gap-6 mt-2">
-          {offSiteStrategy && offSiteStrategy.map((hub, idx) => {
+          {offSiteStrategy.map((hub, idx) => {
             const isCompleted = !!completedHubs[idx];
             const isCopied = !!copiedStates[idx];
 
@@ -75,21 +79,18 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
                     : "bg-white border-slate-200/85 hover:border-brand-primary/25 hover:shadow-md hover:shadow-slate-100/10"
                 }`}
               >
-                {/* Active/Completed Visual Left accent */}
                 <div className={`absolute top-0 left-0 w-1 h-full transition-colors duration-300 ${
                   isCompleted ? "bg-emerald-500" : "bg-slate-200 group-hover:bg-brand-primary/40"
                 }`}></div>
 
-                {/* Left Side: Hub Info & Objective Copy */}
                 <div className="flex-1 flex gap-4 items-start pl-2">
-                  {/* Task Checkbox */}
                   <button 
                     onClick={() => toggleComplete(idx)}
                     className={`mt-1 flex-shrink-0 cursor-pointer text-text-secondary hover:text-brand-primary transition-colors focus:outline-none`}
                     title={isCompleted ? "Mark incomplete" : "Mark as posted"}
                   >
                     {isCompleted ? (
-                      <CheckSquare className="w-5 h-5 text-emerald-500 animate-scale-in" />
+                      <CheckSquare className="w-5 h-5 text-emerald-500 animate-pulse" />
                     ) : (
                       <Square className="w-5 h-5 text-slate-400 hover:text-brand-primary" />
                     )}
@@ -97,14 +98,14 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
 
                   <div className="flex-grow space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-3xs font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 uppercase tracking-wide">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-extrabold bg-brand-primary/10 text-brand-primary border border-brand-primary/20 uppercase tracking-wide">
                         {hub.platform}
                       </span>
                       <span className="text-xs font-mono font-bold text-text-primary">
                         {hub.hubName}
                       </span>
                       {isCompleted && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-4xs font-bold uppercase tracking-widest">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 text-[10px] font-bold uppercase tracking-widest">
                           Published
                         </span>
                       )}
@@ -114,7 +115,7 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
                       <p className={`text-xs sm:text-sm leading-relaxed p-4 rounded-xl font-sans border transition-all ${
                         isCompleted
                           ? "bg-slate-100/50 text-text-secondary/60 line-through border-slate-200"
-                          : "bg-slate-55 text-text-primary border-slate-200/50"
+                          : "bg-slate-50 text-text-primary border-slate-200/50"
                       }`}>
                         {hub.objectiveCopy}
                       </p>
@@ -122,13 +123,12 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
                   </div>
                 </div>
 
-                {/* Right Side: Action Controls */}
                 <div className="flex md:flex-col justify-end items-center md:items-end gap-3 flex-shrink-0 pl-11 md:pl-0 border-t md:border-t-0 md:border-l border-slate-200/50 pt-4 md:pt-0 md:pl-6 md:min-w-[160px]">
                   <button
                     onClick={() => handleCopy(hub.objectiveCopy, idx)}
                     className={`w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm active:scale-98 cursor-pointer border ${
                       isCopied
-                        ? "bg-emerald-500/10 text-emerald-650 border-emerald-500/30"
+                        ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/30"
                         : "bg-white text-text-primary border-slate-200 hover:bg-slate-50"
                     }`}
                   >
@@ -149,7 +149,7 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
                     href={`https://www.google.com/search?q=${encodeURIComponent(hub.platform + " " + hub.hubName)}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200 bg-white text-text-secondary hover:text-text-primary hover:bg-slate-50 shadow-2xs active:scale-98 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200 bg-white text-text-secondary hover:text-text-primary hover:bg-slate-50 shadow-sm active:scale-98 cursor-pointer"
                   >
                     <span>Visit Platform</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -160,12 +160,11 @@ export default function OffSiteStrategyZone({ data }: OffSiteStrategyZoneProps) 
           })}
         </div>
 
-        {/* Tactical Guidance Footer */}
         <div className="bg-slate-50 border border-slate-200/50 rounded-xl px-5 py-4 text-xs text-text-secondary flex flex-col sm:flex-row items-start sm:items-center gap-3 mt-2">
           <span className="text-xl">💡</span>
           <div>
             <p className="font-bold text-text-primary">Citation Playbook Tip</p>
-            <p className="text-3xs text-text-secondary leading-relaxed mt-0.5">
+            <p className="text-[10px] text-text-secondary leading-relaxed mt-0.5">
               AI engines search Reddit, Quora, and developer forums daily to extract real-world feedback and entity associations. Posting this helpful, objective copy in relevant threads builds organic citation links, training LLMs to associate your product with your targeted semantic niches.
             </p>
           </div>

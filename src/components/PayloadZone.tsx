@@ -1,17 +1,22 @@
+'use client';
+
 import React, { useState } from "react";
-import { AnalysisData } from "@/types";
+import { AnalysisData, GeoAnalysisData } from "@/types";
 import { Terminal, Copy, Check, FileCode, FileText, Globe } from "lucide-react";
 
 interface PayloadZoneProps {
-  data: AnalysisData;
+  data?: AnalysisData;
+  payloads?: GeoAnalysisData['payloads'];
 }
 
 type TabType = "jsonLd" | "faqMarkdown" | "geoCopy";
 
-export default function PayloadZone({ data }: PayloadZoneProps) {
-  const { payloads } = data;
+export default function PayloadZone({ data, payloads: propPayloads }: PayloadZoneProps) {
+  const payloads = propPayloads || data?.payloads;
   const [activeTab, setActiveTab] = useState<TabType>("jsonLd");
   const [copied, setCopied] = useState(false);
+
+  if (!payloads) return null;
 
   const activeContent = 
     activeTab === "jsonLd" ? payloads.jsonLd :
@@ -34,10 +39,8 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
       className="w-full max-w-7xl mx-auto px-6 tab-fade-in transition-all duration-700 ease-out transform"
     >
       <div className="bg-slate-900 rounded-2xl overflow-hidden shadow-lg border border-slate-800/80 relative">
-        {/* Terminal Header */}
         <div className="bg-slate-950 px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-b border-slate-850 gap-4">
           <div className="flex items-center gap-3">
-            {/* macOS Style Window controls */}
             <div className="flex gap-1.5 mr-2">
               <span className="w-2.5 h-2.5 rounded-full bg-state-error/70 block"></span>
               <span className="w-2.5 h-2.5 rounded-full bg-state-warning/70 block"></span>
@@ -51,7 +54,6 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
             </div>
           </div>
 
-          {/* Tab Navigation */}
           <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800">
             <button
               onClick={() => { setActiveTab("jsonLd"); setCopied(false); }}
@@ -90,9 +92,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
           </div>
         </div>
 
-        {/* Terminal Body */}
         <div className="relative bg-slate-950 p-6 sm:p-8 font-mono text-xs sm:text-sm text-slate-100 leading-relaxed overflow-x-auto min-h-[300px]">
-          {/* Copy Button */}
           <div className="absolute top-4 right-4 z-10">
             <button
               onClick={handleCopy}
@@ -117,7 +117,6 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
             </button>
           </div>
 
-          {/* Payload display */}
           <pre className="whitespace-pre overflow-x-auto pr-24 select-all outline-none font-mono">
             <code>
               {activeContent}
@@ -125,8 +124,7 @@ export default function PayloadZone({ data }: PayloadZoneProps) {
           </pre>
         </div>
 
-        {/* Payload Usage Instructions */}
-        <div className="bg-slate-900/40 border-t border-slate-850 px-6 py-4 text-2xs text-slate-400 flex items-center justify-between">
+        <div className="bg-slate-900/40 border-t border-slate-850 px-6 py-4 text-[10px] text-slate-400 flex items-center justify-between">
           <span className="font-semibold text-slate-400">
             {activeTab === "jsonLd" && "ℹ️ Paste this JSON-LD script inside the <head> tag of your target website code."}
             {activeTab === "faqMarkdown" && "ℹ️ Add these FAQs in a clear visible content section of your site, optimized for semantic vector searching."}

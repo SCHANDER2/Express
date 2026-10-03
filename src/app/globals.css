@@ -1,23 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --color-bg-main: #F9FAFB;
+  --color-bg-main: #F8FAFC;
   --color-surface-base: #FFFFFF;
   --color-surface-overlay: #F1F5F9;
   --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-brand-primary: #0891B2; /* Cyan */
-  --color-brand-accent: #F97316; /* Orange */
-  --color-state-success: #10B981;
-  --color-state-warning: #F97316;
-  --color-state-error: #EF4444;
+  --color-text-secondary: #64748B;
+  --color-brand-primary: #2563EB;
+  --color-brand-accent: #7C3AED;
+  --color-state-success: #16A34A;
+  --color-state-warning: #EA580C;
+  --color-state-error: #DC2626;
 }
 
 @theme {
   --font-sans: var(--font-geist-sans), sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 
-  /* Color mapping */
   --color-bg-main: var(--color-bg-main);
   --color-surface-base: var(--color-surface-base);
   --color-surface-overlay: var(--color-surface-overlay);
@@ -28,20 +27,8 @@
   --color-state-success: var(--color-state-success);
   --color-state-warning: var(--color-state-warning);
   --color-state-error: var(--color-state-error);
-
-  /* Spacing Tokens */
-  --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 24px;
-  --spacing-xl: 32px;
-  --spacing-xxl: 48px;
-
-  /* Transitions */
-  --transition-all-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -60,7 +47,6 @@
   background: rgba(15, 23, 42, 0.18);
 }
 
-/* Log Terminal Scrollbar */
 .log-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -83,13 +69,11 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Focus indicator policy */
 input:focus, button:focus {
   outline: 2px solid var(--color-brand-primary);
   outline-offset: 2px;
 }
 
-/* Light Mode Premium Card Panels */
 .light-panel {
   background-color: var(--color-surface-base);
   border: 1px solid rgba(15, 23, 42, 0.06);
@@ -98,18 +82,16 @@ input:focus, button:focus {
 }
 
 .light-panel:hover {
-  border-color: rgba(8, 145, 178, 0.3);
-  box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.1), 0 0 15px rgba(8, 145, 178, 0.03);
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 12px 30px -10px rgba(15, 23, 42, 0.1), 0 0 15px rgba(37, 99, 235, 0.03);
   transform: translateY(-2px);
 }
 
-/* Custom dot grid overlay for light theme */
 .dot-grid {
   background-image: radial-gradient(rgba(15, 23, 42, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
-/* Tab content animations */
 .tab-fade-in {
   animation: tabFade 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
