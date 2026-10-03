@@ -36,7 +36,7 @@ export function parseHtml(html: string, url: string, statusCode: number, respons
   let hostname = '';
   try {
     hostname = new URL(url).hostname;
-  } catch (e) {
+  } catch {
     // Ignore invalid URL
   }
 
@@ -177,7 +177,7 @@ export function parseHtml(html: string, url: string, statusCode: number, respons
             isExternal = true;
           }
         }
-      } catch (e) {
+      } catch {
         // invalid URL
       }
       

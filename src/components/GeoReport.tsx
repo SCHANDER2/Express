@@ -5,7 +5,7 @@ import { GeoAnalysisData } from '@/types';
 import ScoreGauge from './ScoreGauge';
 import PayloadZone from './PayloadZone';
 import OffSiteStrategyZone from './OffSiteStrategyZone';
-import { Database, Search, ShieldCheck, FileText, CheckCircle2, XCircle, Users, BarChart3, Sparkles, AlertCircle } from 'lucide-react';
+import { Database, Search, ShieldCheck, FileText, CheckCircle2, XCircle, BarChart3, Sparkles, AlertCircle } from 'lucide-react';
 
 interface GeoReportProps {
   data: GeoAnalysisData;
@@ -239,7 +239,7 @@ export default function GeoReport({ data }: GeoReportProps) {
                     <Sparkles className="w-3.5 h-3.5 text-brand-accent" /> Why the AI Prefers Them
                   </h5>
                   <p className="text-xs text-text-secondary leading-relaxed italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    "{competitor.whyAiPrefers}"
+                    &ldquo;{competitor.whyAiPrefers}&rdquo;
                   </p>
                 </div>
               </div>

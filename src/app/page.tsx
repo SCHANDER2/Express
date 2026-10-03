@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AnalysisResult } from "@/types";
 import SeoAuditReport from "../components/SeoAuditReport";
 import AeoReport from "../components/AeoReport";
@@ -71,7 +71,6 @@ export default function Home() {
   useEffect(() => {
     let logInterval: NodeJS.Timeout;
     if (status === "analyzing") {
-      setLogs([]);
       let logIndex = 0;
       logInterval = setInterval(() => {
         if (logIndex < SIMULATED_LOGS.length) {
@@ -114,6 +113,7 @@ export default function Home() {
 
     setCurrentStep(0);
     setResult(null);
+    setLogs([]);
     setStatus("analyzing");
 
     try {
